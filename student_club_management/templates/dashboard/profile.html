@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - DUT Club Management{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-4 mb-4">
+    <!-- Profile Card -->
+    <div class="glass-card text-center">
+      <div class="profile-avatar-large mx-auto mb-3">
+        {% if user.profile_image and user.profile_image != 'default-avatar.png' %}
+          <img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}" alt="Profile" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+        {% else %}
+          <span style="font-size: 48px;">{{ user.first_name[0] }}{{ user.last_name[0] }}</span>
+        {% endif %}
+      </div>
+      <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+      <p class="text-muted">{{ user.email }}</p>
+      <span class="role-badge role-{{ user.role }}">{{ user.role }}</span>
+      
+      <hr>
+      
+      <div class="text-start">
+        <p><strong>🎓 Student Number:</strong> {{ user.student_number }}</p>
+        {% if pre_student %}
+          <p><strong>🆔 ID Number:</strong> {{ pre_student.id_number }}</p>
+        {% endif %}
+        <p><strong>📅 Joined:</strong> {{ user.created_at.strftime('%B %d, %Y') }}</p>
+        {% if user.last_login %}
+          <p><strong>🕐 Last Login:</strong> {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-8">
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+          👤 Personal Details
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">
+          🔐 Change Password
+        </button>
+      </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="profileTabsContent">
+      <!-- Personal Details Tab -->
+      <div class="tab-pane fade show active" id="details" role="tabpanel">
+        <div class="glass-card">
+          <h4 class="mb-4">Edit Personal Details</h4>
+          <form method="post" action="/dashboard/profile">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="first_name" class="form-label">First Name *</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="last_name" class="form-label">Last Name *</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email Address *</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="student_number" class="form-label">Student Number</label>
+                <input type="text" class="form-control" id="student_number" value="{{ user.student_number }}" disabled>
+                <small class="text-muted">Student number cannot be changed</small>
+              </div>
+              <div class="col-12">
+                <label for="bio" class="form-label">Bio</label>
+                <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="Tell us about yourself...">{{ user.bio or '' }}</textarea>
+              </div>
+              <div class="col-12">
+                <label for="interests" class="form-label">Interests</label>
+                <input type="text" class="form-control" id="interests" name="interests" value="{{ user.interests or '' }}" placeholder="e.g., Sports, Music, Technology">
+                <small class="text-muted">Separate interests with commas</small>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-4">Save Changes</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Password Tab -->
+      <div class="tab-pane fade" id="password" role="tabpanel">
+        <div class="glass-card">
+          <h4 class="mb-4">Change Password</h4>
+          <form method="post" action="/dashboard/profile/update-password">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="current_password" class="form-label">Current Password *</label>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+              </div>
+              <div class="col-md-6">
+                <label for="new_password" class="form-label">New Password *</label>
+                <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                <small class="text-muted">Minimum 6 characters</small>
+              </div>
+              <div class="col-md-6">
+                <label for="confirm_password" class="form-label">Confirm New Password *</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-4">Update Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Admin Info Section (if pre-student info exists) -->
+    {% if pre_student %}
+    <div class="glass-card mt-4">
+      <h4 class="mb-3">📋 Admin-Registered Information</h4>
+      <p class="text-muted">This information was registered by the admin before you could create your account.</p>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p><strong>Full Name:</strong> {{ pre_student.first_name }} {{ pre_student.last_name }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Student Number:</strong> {{ pre_student.student_number }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>ID Number:</strong> {{ pre_student.id_number }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Status:</strong> 
+            {% if pre_student.is_registered %}
+              <span class="badge bg-success">Registered</span>
+            {% else %}
+              <span class="badge bg-warning">Pending</span>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

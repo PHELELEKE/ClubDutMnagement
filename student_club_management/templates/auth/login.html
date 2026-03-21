@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="glass-card auth-card">
+  <h2 class="text-center">Log In</h2>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+      {{ form.email.label(class_='form-label') }}
+      {{ form.email(class_='form-control') }}
+      {% for error in form.email.errors %}
+        <small class="text-danger">{{ error }}</small>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.password.label(class_='form-label') }}
+      {{ form.password(class_='form-control') }}
+      {% for error in form.password.errors %}
+        <small class="text-danger">{{ error }}</small>
+      {% endfor %}
+    </div>
+    <div class="form-check">
+      {{ form.remember(class_='form-check-input') }}
+      {{ form.remember.label(class_='form-check-label') }}
+      <a href="{{ url_for('auth.forgot_password') }}" class="float-end">Forgot password?</a>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block mt-3">{{ form.submit.label.text }}</button>
+  </form>
+  <div class="mt-2 text-center">
+    <a href="{{ url_for('auth.register') }}">Don't have an account? Register</a>
+  </div>
+</div>
+{% endblock %}

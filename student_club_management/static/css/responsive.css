@@ -1,0 +1,1196 @@
+/* ========================================
+   RESPONSIVE STYLES - Mobile, Tablet, PC
+   ======================================== */
+
+/* Base Responsive Settings */
+:root {
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    
+    /* Breakpoints */
+    --mobile: 480px;
+    --tablet: 768px;
+    --laptop: 1024px;
+    --desktop: 1200px;
+}
+
+/* ========================================
+   GLOBAL MOBILE STYLES
+   ======================================== */
+
+@media (max-width: 480px) {
+    /* Global Typography */
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.35rem !important; }
+    h3 { font-size: 1.2rem !important; }
+    h4 { font-size: 1.1rem !important; }
+    h5 { font-size: 1rem !important; }
+    h6 { font-size: 0.9rem !important; }
+    
+    p { font-size: 0.9rem; }
+    
+    /* Container adjustments */
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    /* Glass card mobile */
+    .glass-card {
+        padding: 1rem;
+        margin: 0.5rem auto;
+        border-radius: 12px;
+    }
+    
+    /* Form controls */
+    .form-control, .form-select {
+        font-size: 14px;
+        padding: 0.6rem 0.75rem;
+    }
+    
+    /* Buttons - Touch friendly */
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+    }
+    
+    .btn-sm {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+        min-height: 36px;
+    }
+    
+    /* Small text */
+    small, .small, .text-small {
+        font-size: 0.75rem;
+    }
+    
+    /* Badges */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.3em 0.5em;
+    }
+    
+    /* Alerts */
+    .alert {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Cards */
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    /* List groups */
+    .list-group-item {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Tables */
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+    
+    /* Nav tabs */
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Modal */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    /* Section titles */
+    .section-title, .page-title {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* ========================================
+   TABLET STYLES (481px - 768px)
+   ======================================== */
+
+@media (min-width: 481px) and (max-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+    
+    h1 { font-size: 2rem !important; }
+    h2 { font-size: 1.75rem !important; }
+    
+    .glass-card {
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        min-height: 44px;
+    }
+}
+
+/* ========================================
+   LAPTOP/MEDIUM SCREENS (769px - 1024px)
+   ======================================== */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+/* ========================================
+   DESKTOP (1025px+)
+   ======================================== */
+
+@media (min-width: 1025px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* ========================================
+   RESPONSIVE NAVBAR
+   ======================================== */
+
+@media (max-width: 991px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+    
+    .navbar .container-fluid {
+        padding: 0;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Mobile menu */
+    .navbar-collapse {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(15px);
+        padding: 1rem;
+        border-radius: 0 0 12px 12px;
+        margin-top: 0.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .navbar .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0;
+        border-radius: 8px;
+    }
+    
+    .navbar .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    /* Dropdown menu */
+    .dropdown-menu {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem;
+        /* CRITICAL: Ensure dropdowns are always on top on mobile */
+        z-index: 10500 !important;
+    }
+    
+    .dropdown-item {
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+    }
+    
+    .dropdown-item:hover {
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+    }
+}
+
+/* Mobile navbar */
+@media (max-width: 575px) {
+    .navbar {
+        padding: 0.5rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem !important;
+    }
+    
+    .navbar-toggler {
+        padding: 0.35rem 0.5rem;
+    }
+    
+    .navbar-collapse {
+        margin-top: 0.5rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE HERO SECTION
+   ======================================== */
+
+@media (max-width: 991px) {
+    .hero-section {
+        padding: 1.5rem 0 2rem;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2rem !important;
+        line-height: 1.3;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-buttons {
+        justify-content: center;
+    }
+    
+    .hero-visual {
+        display: none;
+    }
+    
+    .btn-hero-primary, .btn-hero-secondary {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.6rem !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   RESPONSIVE STATS
+   ======================================== */
+
+@media (max-width: 767px) {
+    .stats-section, .stats-grid {
+        padding: 1.5rem 0;
+    }
+    
+    .stat-card, .stat-card-admin {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.75rem !important;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
+    
+    /* Stats row for dashboard */
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-box {
+        padding: 1rem;
+    }
+    
+    .stat-icon-box {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .stat-value {
+        font-size: 1.4rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* ========================================
+   RESPONSIVE FEATURES & CARDS
+   ======================================== */
+
+@media (max-width: 991px) {
+    .features-section {
+        padding: 2rem 0;
+    }
+    
+    .feature-card {
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.75rem !important;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .feature-card {
+        padding: 1rem;
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+    }
+    
+    .feature-card h4 {
+        font-size: 1rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.85rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE CLUBS PAGE
+   ======================================== */
+
+@media (max-width: 991px) {
+    .clubs-page {
+        padding: 0.75rem;
+    }
+    
+    .clubs-header {
+        padding: 1.5rem 0 1rem;
+    }
+    
+    .page-title {
+        font-size: 2rem !important;
+    }
+    
+    .page-subtitle {
+        font-size: 1rem;
+    }
+    
+    .btn-create-club {
+        width: 100%;
+        margin-top: 1rem;
+        text-align: center;
+    }
+    
+    .search-section {
+        padding: 1rem 0;
+    }
+    
+    .search-box, .form-select {
+        margin-bottom: 0.75rem;
+    }
+    
+    .categories-pills {
+        padding: 0.75rem 0 1rem;
+        justify-content: flex-start;
+    }
+    
+    .category-pill {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .club-card-new {
+        margin-bottom: 1rem;
+    }
+    
+    .club-card-body {
+        padding: 1rem;
+    }
+    
+    .club-name {
+        font-size: 1.15rem;
+    }
+    
+    .club-description {
+        font-size: 0.85rem;
+    }
+    
+    .club-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .club-card-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn-view-club {
+        width: 100%;
+    }
+    
+    .member-badge {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .clubs-stats-footer {
+        padding: 1rem;
+    }
+    
+    .clubs-stats-footer .col-4 {
+        margin-bottom: 0.75rem;
+    }
+    
+    .footer-stat h3 {
+        font-size: 1.5rem;
+    }
+    
+    .footer-stat p {
+        font-size: 0.8rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE DASHBOARD (USER)
+   ======================================== */
+
+@media (max-width: 991px) {
+    .user-dashboard {
+        padding: 0.75rem;
+    }
+    
+    .welcome-banner {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .welcome-heading {
+        font-size: 1.5rem !important;
+    }
+    
+    .welcome-text {
+        font-size: 1rem;
+    }
+    
+    .btn-browse-clubs {
+        width: 100%;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+    
+    .dashboard-sections {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions-section {
+        padding: 0;
+    }
+    
+    .actions-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .action-tile {
+        padding: 1rem;
+    }
+    
+    .action-emoji {
+        font-size: 1.5rem;
+    }
+    
+    .action-text {
+        font-size: 0.9rem;
+    }
+    
+    .action-desc {
+        display: none;
+    }
+}
+
+@media (max-width: 575px) {
+    .welcome-heading {
+        font-size: 1.25rem !important;
+    }
+    
+    .actions-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-tile {
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+        gap: 0.75rem;
+    }
+    
+    .action-emoji {
+        font-size: 1.25rem;
+        margin-bottom: 0;
+    }
+    
+    .action-desc {
+        display: block;
+        font-size: 0.75rem;
+    }
+    
+    /* Items grid */
+    .items-grid {
+        gap: 0.5rem;
+    }
+    
+    .item-card {
+        flex-wrap: wrap;
+        padding: 0.75rem;
+    }
+    
+    .item-icon, .event-date-box {
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-info {
+        flex: 1 1 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-meta {
+        flex: 1;
+        align-items: flex-start;
+    }
+    
+    .btn-details {
+        width: 100%;
+        text-align: center;
+        margin-top: 0.5rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE LEADER DASHBOARD
+   ======================================== */
+
+@media (max-width: 991px) {
+    .dashboard-content {
+        padding: 0.5rem;
+    }
+    
+    .dashboard-content .glass-card {
+        padding: 1rem;
+    }
+    
+    /* Tab navigation */
+    .tab-navigation {
+        padding: 0.5rem 0.5rem 0;
+        overflow-x: auto;
+    }
+    
+    .tab-navigation .nav-tabs {
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .tab-navigation .nav-tabs .nav-link {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    .tab-content {
+        border-radius: 0 0 12px 12px !important;
+        padding: 1rem !important;
+    }
+    
+    .tab-content .glass-card {
+        padding: 1rem;
+    }
+    
+    /* Club/Event cards */
+    .col-xl-6, .col-lg-8, .col-md-10, .col-lg-6 {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .tab-navigation .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .club-stats p, .event-stats p {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .d-flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem !important;
+    }
+    
+    .d-flex.gap-2 .btn {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   RESPONSIVE ADMIN DASHBOARD
+   ======================================== */
+
+@media (max-width: 991px) {
+    .admin-dashboard {
+        padding: 0.75rem;
+    }
+    
+    .admin-header {
+        padding: 1.5rem 0 1rem;
+        text-align: center;
+    }
+    
+    .admin-title {
+        font-size: 1.75rem !important;
+    }
+    
+    .admin-subtitle {
+        font-size: 1rem;
+    }
+    
+    .btn-settings, .btn-back {
+        width: 100%;
+        margin-top: 0.75rem;
+        text-align: center;
+    }
+    
+    .admin-content-grid {
+        margin-top: 1rem;
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .quick-action-card {
+        padding: 1rem;
+    }
+    
+    .action-icon {
+        font-size: 1.5rem;
+    }
+    
+    .action-label {
+        font-size: 0.85rem;
+    }
+    
+    .action-arrow {
+        display: none;
+    }
+    
+    /* Recent lists */
+    .recent-item {
+        flex-wrap: wrap;
+    }
+    
+    .recent-info {
+        flex: 1 1 70%;
+    }
+    
+    .recent-meta {
+        flex: 1 1 100%;
+        text-align: left;
+        margin-top: 0.5rem;
+    }
+    
+    /* Pending items */
+    .pending-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .pending-actions {
+        width: 100%;
+    }
+    
+    .pending-actions .btn-action {
+        flex: 1;
+    }
+}
+
+@media (max-width: 575px) {
+    .admin-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card-admin .stat-icon {
+        font-size: 1.75rem;
+    }
+    
+    .stat-card-admin .stat-info h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE ADMIN TABLES
+   ======================================== */
+
+@media (max-width: 991px) {
+    .table-responsive {
+        margin-bottom: 1rem;
+    }
+    
+    .table-admin {
+        font-size: 0.85rem;
+    }
+    
+    .table-admin th, .table-admin td {
+        padding: 0.6rem;
+    }
+    
+    .user-cell {
+        gap: 0.5rem;
+    }
+    
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 0.7rem;
+    }
+    
+    .user-details h4 {
+        font-size: 0.85rem;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .role-select {
+        min-width: 100px;
+        font-size: 0.75rem;
+    }
+    
+    .btn-action-small {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .table-admin th:nth-child(2),
+    .table-admin td:nth-child(2) {
+        display: none;
+    }
+}
+
+@media (max-width: 575px) {
+    .table-admin th:nth-child(4),
+    .table-admin td:nth-child(4) {
+        display: none;
+    }
+    
+    .search-box-admin {
+        margin-top: 0.5rem;
+    }
+    
+    .search-box-admin .form-control {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   RESPONSIVE EVENT PAGES
+   ======================================== */
+
+@media (max-width: 991px) {
+    .events-page, .event-detail-page {
+        padding: 0.75rem;
+    }
+    
+    /* Event detail - stack columns */
+    .event-detail-page .row {
+        flex-direction: column;
+    }
+    
+    .event-detail-page .col-lg-8,
+    .event-detail-page .col-lg-4 {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    /* Calendar page */
+    .col-md-9, .col-md-3 {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    #calendar {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 767px) {
+    .event-date-box {
+        min-width: 45px;
+        padding: 0.5rem;
+    }
+    
+    .event-day {
+        font-size: 1.1rem;
+    }
+    
+    .event-month {
+        font-size: 0.6rem;
+    }
+    
+    .list-group-item {
+        padding: 0.75rem;
+    }
+    
+    /* Event list sidebar */
+    .event-sidebar {
+        max-height: 300px;
+    }
+    
+    .event-sidebar a {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .event-detail-page .glass-card {
+        padding: 1rem;
+    }
+    
+    .event-detail-page h2 {
+        font-size: 1.35rem !important;
+    }
+    
+    .event-detail-page h5 {
+        font-size: 1rem;
+    }
+    
+    .event-detail-page ul li {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .btn-details, .btn-view, .btn-warning, .btn-info {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE CLUB PAGES
+   ======================================== */
+
+@media (max-width: 991px) {
+    .club-detail-page .row {
+        flex-direction: column;
+    }
+    
+    .club-detail-page .col-md-8,
+    .club-detail-page .col-md-4 {
+        width: 100%;
+    }
+    
+    .club-detail-page .glass-card {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .club-detail-page h2 {
+        font-size: 1.35rem !important;
+    }
+    
+    .club-detail-page .list-group-item {
+        padding: 0.75rem;
+    }
+    
+    .club-detail-page .btn-block {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE AUTH PAGES
+   ======================================== */
+
+@media (max-width: 575px) {
+    .auth-card {
+        padding: 1.25rem !important;
+        margin: 0.5rem auto;
+    }
+    
+    .auth-card h2 {
+        font-size: 1.35rem !important;
+    }
+    
+    .auth-card .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .auth-card .form-label {
+        font-size: 0.9rem;
+    }
+    
+    .auth-card .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .auth-card .form-check-label {
+        font-size: 0.85rem;
+    }
+    
+    .auth-card .float-end {
+        float: none !important;
+        display: block;
+        margin-top: 0.5rem;
+    }
+    
+    .auth-card .btn-block {
+        width: 100%;
+    }
+    
+    .auth-card .mt-2 {
+        margin-top: 1rem !important;
+    }
+}
+
+/* ========================================
+   RESPONSIVE NOTIFICATIONS
+   ======================================== */
+
+@media (max-width: 575px) {
+    .notifications-page {
+        padding: 0.5rem;
+    }
+    
+    .notifications-page .glass-card {
+        padding: 1rem;
+    }
+    
+    .notification-item {
+        padding: 0.75rem;
+    }
+    
+    .notification-item h5 {
+        font-size: 0.95rem;
+    }
+    
+    .notification-item p {
+        font-size: 0.85rem;
+    }
+    
+    .notification-time {
+        font-size: 0.75rem;
+    }
+}
+
+/* ========================================
+   RESPONSIVE FOOTER
+   ======================================== */
+
+@media (max-width: 575px) {
+    footer {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    footer p {
+        font-size: 0.85rem;
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES FOR RESPONSIVE
+   ======================================== */
+
+/* Hide on mobile */
+@media (max-width: 575px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Hide on tablet */
+@media (max-width: 767px) {
+    .hide-tablet {
+        display: none !important;
+    }
+}
+
+/* Show only on mobile */
+@media (min-width: 576px) {
+    .show-mobile-only {
+        display: none !important;
+    }
+}
+
+/* Full width on mobile */
+@media (max-width: 575px) {
+    .w-mobile-100 {
+        width: 100% !important;
+    }
+}
+
+/* Center text on mobile */
+@media (max-width: 767px) {
+    .text-mobile-center {
+        text-align: center !important;
+    }
+}
+
+/* Stack flex on mobile */
+@media (max-width: 575px) {
+    .flex-mobile-column {
+        flex-direction: column !important;
+    }
+    
+    .flex-mobile-column .btn,
+    .flex-mobile-column .form-control {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ========================================
+   SCROLLBARS FOR MOBILE
+   ======================================== */
+
+@media (max-width: 575px) {
+    /* Horizontal scroll for tables */
+    .table-scroll-mobile {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Smooth scroll */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Prevent horizontal scroll */
+    body {
+        overflow-x: hidden;
+    }
+}
+
+/* ========================================
+   TOUCH OPTIMIZATIONS
+   ======================================== */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Touch devices */
+    .btn, .nav-link, .category-pill, .action-tile {
+        min-height: 44px;
+    }
+    
+    a, button, .form-control, .form-select, select {
+        min-height: 44px;
+    }
+    
+    /* Larger tap targets */
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Disable hover effects on touch */
+    .btn:hover {
+        transform: none;
+    }
+    
+    .card:hover, .glass-card:hover {
+        transform: none;
+    }
+}
+
+/* ========================================
+   SAFE AREA FOR NOTCHED PHONES
+   ======================================== */
+
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(0.5rem, env(safe-area-inset-left));
+        padding-right: max(0.5rem, env(safe-area-inset-right));
+    }
+    
+    .navbar {
+        padding-top: max(0.5rem, env(safe-area-inset-top));
+    }
+}
+

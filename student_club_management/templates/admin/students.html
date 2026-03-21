@@ -1,0 +1,359 @@
+
+{% extends 'base.html' %}
+{% block title %}Manage Students - Admin{% endblock %}
+{% block content %}
+<div class="admin-dashboard">
+
+<!-- Header -->
+<div class="admin-header">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="admin-title">🎓 Student Pre-registration Management</h1>
+      <p class="admin-subtitle">Add and manage students who can register to the system</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      <div class="header-actions">
+        <a href="/dashboard/admin" class="btn btn-back">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">👥</span>
+        <div class="mini-stat-info">
+          <h4>{{ students|length }}</h4>
+          <p>Total Pre-registered</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">⏳</span>
+        <div class="mini-stat-info">
+          <h4>{{ pending_count }}</h4>
+          <p>Pending Registration</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">✅</span>
+        <div class="mini-stat-info">
+          <h4>{{ registered_count }}</h4>
+          <p>Registered</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Student Form -->
+<div class="admin-card mb-4">
+  <div class="admin-card-header">
+    <h3>➕ Add New Student</h3>
+  </div>
+  <div class="admin-card-body">
+    <form action="/admin/students/add" method="post" class="row g-3" id="addStudentForm">
+      <div class="col-md-3">
+        <label for="student_number" class="form-label">Student Number * (8-9 digits)</label>
+        <input type="text" class="form-control" id="student_number" name="student_number" placeholder="e.g., 2024001" pattern="^[0-9]{8,9}$" required minlength="8" maxlength="9">
+        <small class="text-muted">Enter 8 or 9 digit student number</small>
+      </div>
+      <div class="col-md-3">
+        <label for="id_number" class="form-label">ID Number * (13 digits)</label>
+        <input type="text" class="form-control" id="id_number" name="id_number" placeholder="e.g., 1234567890123" pattern="^[0-9]{13}$" required minlength="13" maxlength="13">
+        <small class="text-muted">Enter 13 digit South African ID</small>
+      </div>
+      <div class="col-md-3">
+        <label for="first_name" class="form-label">First Name *</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+      </div>
+      <div class="col-md-3">
+        <label for="last_name" class="form-label">Last Name *</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+      </div>
+      <div class="col-md-6">
+        <label for="email" class="form-label">Email (Optional)</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="student@dut.ac.za">
+      </div>
+      <div class="col-md-6 d-flex align-items-end">
+        <button type="submit" class="btn btn-success">Add Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Students List -->
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h3>📋 Pre-registered Students</h3>
+    <div class="search-box-admin">
+      <input type="text" id="studentSearch" placeholder="Search students..." class="form-control">
+    </div>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if students %}
+      <div class="table-responsive">
+        <table class="table-admin">
+          <thead>
+            <tr>
+              <th>Student Number</th>
+              <th>Full Name</th>
+              <th>ID Number</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Added Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTableBody">
+            {% for s in students %}
+              <tr class="student-row" data-name="{{ s.first_name }} {{ s.last_name|lower }}" data-student="{{ s.student_number }}">
+                <td>
+                  <strong>{{ s.student_number }}</strong>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar">{{ s.first_name[0] }}{{ s.last_name[0] }}</div>
+                    <div class="user-details">
+                      <h4>{{ s.first_name }} {{ s.last_name }}</h4>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ s.id_number }}</td>
+                <td>{{ s.email or '-' }}</td>
+                <td>
+                  {% if s.is_registered %}
+                    <span class="role-badge role-admin">Registered</span>
+                  {% else %}
+                    <span class="role-badge role-student">Pending</span>
+                  {% endif %}
+                </td>
+                <td>{{ s.created_at.strftime('%b %d, %Y') }}</td>
+                <td>
+                  <div class="action-buttons">
+                    {% if not s.is_registered %}
+                      <form action="/admin/students/toggle-status/{{ s.id }}" method="post" class="d-inline">
+                        <button type="submit" class="btn-action-small btn-role" title="Mark as Registered">
+                          ✅ Mark Registered
+                        </button>
+                      </form>
+                    {% else %}
+                      <form action="/admin/students/toggle-status/{{ s.id }}" method="post" class="d-inline">
+                        <button type="submit" class="btn-action-small btn-role" title="Mark as Pending">
+                          ↩️ Mark Pending
+                        </button>
+                      </form>
+                    {% endif %}
+                    <button type="button" class="btn-action-small btn-delete" onclick="showDeleteModal('{{ s.id }}', '{{ s.first_name }} {{ s.last_name }}', '{{ s.student_number }}')">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-admin">
+        <span class="empty-icon">🎓</span>
+        <h3>No students added yet</h3>
+        <p>Add students above who will be allowed to register to the system</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+</div>
+
+<!-- Custom Delete Modal -->
+<div id="deleteModal" class="custom-modal" style="display: none;">
+  <div class="custom-modal-backdrop" onclick="closeDeleteModal()"></div>
+  <div class="custom-modal-content">
+    <div class="custom-modal-header">
+      <h5>Confirm Delete</h5>
+      <button type="button" class="custom-modal-close" onclick="closeDeleteModal()">&times;</button>
+    </div>
+    <div class="custom-modal-body">
+      <p>Are you sure you want to remove this student from the pre-registered list?</p>
+      <div class="delete-user-info">
+        <strong id="deleteUserName"></strong>
+        <br><small id="deleteStudentNum"></small>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <form id="deleteForm" action="" method="post">
+        <button type="submit" class="btn-delete-confirm">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Custom Modal Styles */
+.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.custom-modal-content {
+  position: relative;
+  background: #1f2937;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.custom-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-modal-header h5 {
+  color: #fff;
+  margin: 0;
+}
+
+.custom-modal-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.custom-modal-close:hover {
+  color: #fff;
+}
+
+.custom-modal-body {
+  padding: 1.5rem;
+}
+
+.custom-modal-body p {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1rem;
+}
+
+.delete-user-info {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.delete-user-info strong {
+  color: #fff;
+}
+
+.delete-user-info small {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-delete-confirm {
+  background: #dc3545;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-delete-confirm:hover {
+  background: #c82333;
+}
+</style>
+
+<script>
+function showDeleteModal(studentId, studentName, studentNum) {
+  document.getElementById('deleteModal').style.display = 'flex';
+  document.getElementById('deleteUserName').textContent = studentName;
+  document.getElementById('deleteStudentNum').textContent = 'Student Number: ' + studentNum;
+  document.getElementById('deleteForm').action = '/admin/students/delete/' + studentId;
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeDeleteModal();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('studentSearch');
+    const studentRows = document.querySelectorAll('.student-row');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        studentRows.forEach(row => {
+            const name = row.dataset.name;
+            const studentNum = row.dataset.student;
+            
+            if (name.includes(searchTerm) || studentNum.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

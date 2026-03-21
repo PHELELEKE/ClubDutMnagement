@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Home - DUT Club Management{% endblock %}
+{% block content %}
+<div class="home-content">
+
+<!-- Hero Section -->
+<div class="hero-section">
+  <div class="row align-items-center min-vh-75">
+    <div class="col-lg-7">
+      <h1 class="hero-title">🎓 Welcome to <span class="text-highlight">DUT Club Management</span></h1>
+      <p class="hero-subtitle">Discover, join, and manage student clubs and groups. Connect with peers, attend events, and build your network.</p>
+      
+      {% if not current_user.is_authenticated %}
+        <div class="hero-buttons">
+          <a href="/login" class="btn btn-lg btn-hero-primary">Login</a>
+          <a href="/register" class="btn btn-lg btn-hero-secondary">Create Account</a>
+        </div>
+      {% else %}
+        <div class="hero-buttons">
+          <a href="/dashboard/user" class="btn btn-lg btn-hero-primary">My Dashboard</a>
+          <a href="/clubs/" class="btn btn-lg btn-hero-secondary">Browse Clubs</a>
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-lg-5 d-none d-lg-block">
+      <div class="hero-visual">
+        <div class="floating-card card-1">🎭 Drama Club</div>
+        <div class="floating-card card-2">⚽ Sports</div>
+        <div class="floating-card card-3">🎨 Art Club</div>
+        <div class="floating-card card-4">💻 Tech Society</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+  <div class="row text-center">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <h2 class="stat-number">50+</h2>
+        <p class="stat-label">Active Clubs</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <h2 class="stat-number">1000+</h2>
+        <p class="stat-label">Students</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <h2 class="stat-number">200+</h2>
+        <p class="stat-label">Events</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <h2 class="stat-number">50+</h2>
+        <p class="stat-label">Achievements</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+  <h2 class="section-title">Why Join DUT Clubs?</h2>
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h4>Discover</h4>
+        <p>Find clubs that match your interests and passions from a wide variety of options.</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="feature-card">
+        <div class="feature-icon">🤝</div>
+        <h4>Connect</h4>
+        <p>Meet like-minded students, build friendships, and expand your network.</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h4>Events</h4>
+        <p>Attend exciting events, workshops, and activities organized by clubs.</p>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h4>Achieve</h4>
+        <p>Earn badges, accumulate points, and showcase your accomplishments.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Club Categories -->
+<div class="categories-section">
+  <h2 class="section-title">Club Categories</h2>
+  <div class="row g-3">
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="category-card">🎭 Drama & Theater</div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="category-card">⚽ Sports & Fitness</div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="category-card">🎨 Arts & Crafts</div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="category-card">💻 Technology</div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="category-card">📚 Academic</div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="category-card">🌍 Community</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h2>Ready to Get Started?</h2>
+      <p>Join thousands of students who are already part of the DUT club community.</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      {% if not current_user.is_authenticated %}
+        <a href="/register" class="btn btn-lg btn-cta">Join Now - It's Free!</a>
+      {% else %}
+        <a href="/clubs/" class="btn btn-lg btn-cta">Explore Clubs</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}{{ announcement.title }} - DUT Club Management{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="glass-card">
+                <div class="mb-3">
+                    <a href="/announcements" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: #fff;">Back to Announcements</a>
+                </div>
+                
+                <div class="announcement-detail-header">
+                    {% if announcement.pinned %}
+                    <span class="badge bg-primary mb-2">Pinned</span>
+                    {% endif %}
+                    {% if announcement.priority == 'urgent' %}
+                    <span class="badge bg-danger mb-2">Urgent</span>
+                    {% elif announcement.priority == 'important' %}
+                    <span class="badge bg-warning mb-2">Important</span>
+                    {% endif %}
+                    
+                    <h1 style="color: #fff;">{{ announcement.title }}</h1>
+                    <p style="color: rgba(255,255,255,0.6);">
+                        By <strong>{{ announcement.creator.first_name }} {{ announcement.creator.last_name }}</strong>
+                        from <strong>{{ club.club_name }}</strong>
+                    </p>
+                </div>
+                
+                <div class="announcement-detail-content">
+                    <p style="color: #fff; white-space: pre-wrap;">{{ announcement.content }}</p>
+                </div>
+                
+                {% if announcement.attachment_url %}
+                <div class="announcement-attachments">
+                    <h5 style="color: #fff;">Attachment</h5>
+                    <a href="/{{ announcement.attachment_url }}" class="attachment-item" target="_blank">
+                        <span>📎 {{ announcement.attachment_name or 'Download Attachment' }}</span>
+                    </a>
+                </div>
+                {% endif %}
+                
+                {% if current_user.role in ['leader', 'admin'] and (current_user.role == 'admin' or club.created_by == current_user.id) %}
+                <div class="announcement-actions mb-4">
+                    <a href="/announcements/{{ announcement.id }}/edit" class="btn btn-sm" style="background: rgba(102,126,234,0.3); color: #fff;">Edit</a>
+                    <form method="POST" action="/announcements/{{ announcement.id }}/delete" class="d-inline" onsubmit="return confirm('Delete this announcement?');">
+                        <button type="submit" class="btn btn-sm" style="background: rgba(239,68,68,0.3); color: #fff;">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+                
+                <hr style="border-color: rgba(255,255,255,0.2);">
+                
+                <div class="reactions-section">
+                    <div class="reaction-buttons">
+                        <button class="reaction-btn" data-reaction="like">Like</button>
+                        <button class="reaction-btn" data-reaction="love">Love</button>
+                        <button class="reaction-btn" data-reaction="celebrate">Celebrate</button>
+                    </div>
+                    <div id="reactionsSummary"></div>
+                </div>
+                
+                <hr style="border-color: rgba(255,255,255,0.2);">
+                
+                <div class="comments-section">
+                    <h4 style="color: #fff;">Comments</h4>
+                    <div class="add-comment">
+                        <textarea id="commentInput" class="form-control" rows="2" placeholder="Write a comment..."></textarea>
+                        <button class="btn mt-2" id="submitComment" style="background: rgba(102,126,234,0.8); color: #fff;">Post</button>
+                    </div>
+                    <div class="comments-list mt-4" id="commentsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+var announcementId = {{ announcement.id }};
+var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+function loadReactions() {
+    // Mark as read when loading detail
+    fetch('/announcements/api/' + announcementId + '/mark-read', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken},
+        credentials: 'same-origin'
+    }).catch(console.error);
+    
+    fetch('/announcements/api/' + announcementId + '/reactions')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var s = document.getElementById('reactionsSummary');
+            if (data.total > 0) {
+                s.innerHTML = '<span>' + data.total + ' reactions</span>';
+            } else {
+                s.innerHTML = '<span style="color:rgba(255,255,255,0.5)">No reactions yet</span>';
+            }
+        });
+}
+
+document.querySelectorAll('.reaction-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        fetch('/announcements/api/' + announcementId + '/react', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({reaction_type: this.dataset.reaction})
+        }).then(function() { loadReactions(); })
+        .catch(function(error) { console.error('Reaction failed:', error); });
+    });
+});
+
+document.getElementById('submitComment').addEventListener('click', function() {
+    var content = document.getElementById('commentInput').value.trim();
+    if (!content) return;
+    fetch('/announcements/api/' + announcementId + '/comment', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'same-origin',
+        body: JSON.stringify({content: content})
+    }).then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) location.reload();
+    });
+});
+
+loadReactions();
+</script>
+{% endblock %}
+

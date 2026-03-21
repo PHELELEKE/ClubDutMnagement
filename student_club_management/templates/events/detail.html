@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.event_name }} - DUT Club Management{% endblock %}
+{% block content %}
+<div class="event-detail-page">
+<div class="row">
+  <div class="col-lg-8">
+    <div class="glass-card mb-4">
+      <h2>{{ event.event_name }}</h2>
+      
+      <div class="mb-3">
+        {% if event.status == 'pending' %}
+          <span class="badge bg-warning">⏳ Pending Admin Approval</span>
+        {% elif event.status == 'approved' %}
+          <span class="badge bg-success">✓ Open for Registration</span>
+        {% elif event.status == 'ongoing' %}
+          <span class="badge bg-info">🔴 Ongoing</span>
+        {% elif event.status == 'completed' %}
+          <span class="badge bg-secondary">✓ Completed</span>
+        {% endif %}
+        
+        {% if event.requires_club %}
+          <span class="badge bg-warning">👥 Team Event</span>
+        {% else %}
+          <span class="badge bg-success">👤 Open Event</span>
+        {% endif %}
+      </div>
+      
+      <h5 class="mt-3">Description</h5>
+      <p>{{ event.description }}</p>
+      
+      <h5 class="mt-3">Event Details</h5>
+      <ul class="list-unstyled">
+        <li><strong>📅 Date:</strong> {{ event.event_date.strftime('%b %d, %Y at %I:%M %p') if event.event_date else 'TBA' }}</li>
+        <li><strong>📍 Location:</strong> {{ event.location }}</li>
+        <li><strong>👥 Attendees:</strong> {{ event.attendees|length }}{% if event.max_attendees %}/{{ event.max_attendees }}{% endif %}</li>
+        {% if event.requires_club %}
+          <li><strong>🎯 Team Event Settings:</strong>
+            {% if event.min_club_members %}Min {{ event.min_club_members }} members per club{% endif %}
+            {% if event.min_club_members and event.max_club_members %} - {% endif %}
+            {% if event.max_club_members %}Max {{ event.max_club_members }} members per club{% endif %}
+          </li>
+        {% endif %}
+      </ul>
+      
+      {% if event.created_by == current_user.id %}
+        <div class="alert alert-info mt-3">
+          <strong>Your Event:</strong> You created this event on {{ event.created_at.strftime('%b %d, %Y') }}
+        </div>
+        <a href="/events/{{ event.id }}/edit" class="btn btn-warning mt-2 w-100 w-md-auto">✏️ Edit Event</a>
+        <a href="/events/{{ event.id }}/attendance" class="btn btn-success mt-2 w-100 w-md-auto">📋 Attendance & Scan QR</a>
+      {% endif %}
+    </div>
+    
+    <div class="glass-card">
+      <h4>👥 Attendees ({{ event.attendees|length }})</h4>
+      {% if event.attendees %}
+        <div class="list-group">
+          {% for attendee in event.attendees %}
+            <div class="list-group-item">
+              <strong>{{ attendee.first_name }} {{ attendee.last_name }}</strong>
+              <br>
+              <small class="text-muted">{{ attendee.student_number }}</small>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">No attendees yet. Be the first to join!</p>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="col-lg-4">
+    <div class="glass-card mb-4">
+      <h5>Register for Event 🎫</h5>
+      
+      {% if event.status != 'approved' %}
+        <div class="alert alert-warning mb-0">
+          <small>Event is not open for registration yet</small>
+        </div>
+      {% elif event.max_attendees and event.attendees|length >= event.max_attendees %}
+        <div class="alert alert-danger mb-0">
+          <small>Event is full</small>
+        </div>
+      {% elif current_user in event.attendees %}
+        <div class="alert alert-success mb-0">
+          <small>✓ You are registered for this event</small>
+        </div>
+        <a href="/events/{{ event.id }}/qr-code" class="btn btn-info w-100 mt-2">📱 View Your QR Code</a>
+      {% elif event.requires_club %}
+        <form method="POST" action="/events/{{ event.id }}/join" class="mb-3">
+          <div class="form-group mb-2">
+            <label class="form-label"><strong>Join as Club Team</strong></label>
+            <p class="small text-muted">All members of your selected club will be added to this event</p>
+            <select class="form-select form-select-sm" name="club_id" required>
+              <option value="">Select your club...</option>
+              {% for membership in current_user.memberships %}
+                {% if membership.club.status == 'active' %}
+                  <option value="{{ membership.club.id }}">
+                    {{ membership.club.club_name }} ({{ membership.club.members|length }} members)
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <small class="text-muted d-block mt-2">When you join, all club members will be auto-registered and notified</small>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Join as Team</button>
+        </form>
+      {% else %}
+        <form method="POST" action="/events/{{ event.id }}/join">
+          <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+      {% endif %}
+      
+      {% if event.requires_club and current_user not in event.attendees %}
+        <div class="alert alert-info mt-2">
+          <small>
+            <strong>ℹ️ Team Event:</strong> You can only join through a club you are a member of.
+            All club members will be registered together.
+          </small>
+        </div>
+      {% endif %}
+    </div>
+    
+    <div class="glass-card">
+      <h6>Event Organizer</h6>
+      <p class="mb-0">
+        <strong>{{ event.creator.first_name }} {{ event.creator.last_name }}</strong>
+        <br>
+        <small>{{ event.creator.email }}</small>
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}

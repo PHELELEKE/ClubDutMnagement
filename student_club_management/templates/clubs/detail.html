@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}{{ club.club_name }} - DUT Club Management{% endblock %}
+{% block content %}
+<div class="club-detail-page">
+<div class="row">
+  <div class="col-md-8">
+    <div class="glass-card mb-4">
+      <h2>{{ club.club_name }}</h2>
+      <p class="lead">{{ club.description }}</p>
+      <div class="mt-3">
+        <span class="badge bg-primary">{{ club.category }}</span>
+        <span class="badge bg-info">{{ club.status }}</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="glass-card mb-4">
+      <h5>Club Info</h5>
+      <ul class="list-unstyled">
+        <li><strong>Members:</strong> {{ club.members|length }}/{% if club.max_members %}{{ club.max_members }}{% else %}∞{% endif %}</li>
+        <li><strong>Category:</strong> {{ club.category }}</li>
+        <li><strong>Created:</strong> {{ club.created_at.strftime('%b %d, %Y') }}</li>
+        <li><strong>Status:</strong> {{ club.status }}</li>
+        <li><strong style="color: #667eea;">Created by:</strong> <br>{{ club.creator.first_name }} {{ club.creator.last_name }}<br><small>{{ club.creator.email }}</small></li>
+      </ul>
+      
+      {% if current_user.is_authenticated %}
+        <form action="/clubs/{{ club.id }}/join" method="post">
+          <button class="btn btn-primary btn-block mt-3 w-100">Join Club</button>
+        </form>
+      {% else %}
+        <a href="/login" class="btn btn-primary btn-block mt-3 w-100">Login to Join</a>
+      {% endif %}
+      
+      {% if club.created_by == current_user.id %}
+        <a href="/clubs/{{ club.id }}/manage" class="btn btn-warning btn-block mt-2 w-100">Manage Club</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="glass-card">
+      <h4>Club Members</h4>
+      {% if club.members %}
+        <div class="table-responsive">
+          <ul class="list-group list-group-flush">
+            {% for member in club.members %}
+              <li class="list-group-item">
+                <strong>{{ member.user.first_name }} {{ member.user.last_name }}</strong>
+                <br><small>{{ member.role }} (Joined: {{ member.joined_date.strftime('%b %d, %Y') }})</small>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-muted">No members yet</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}

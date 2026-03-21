@@ -1,0 +1,588 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.event_name }} - Attendance{% endblock %}
+
+{% block content %}
+<style>
+    .attendance-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 3rem;
+    }
+    
+    .attendance-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .event-meta {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .event-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card p {
+        color: #666;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+    
+    .scanner-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .btn-group-custom {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 1.5rem 0;
+    }
+    
+    .btn-lg-custom {
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .attendee-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+    }
+    
+    .attendee-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    
+    .attendee-card.attended {
+        border-left-color: #28a745;
+        background: #f0f9ff;
+    }
+    
+    .attendee-info {
+        flex: 1;
+    }
+    
+    .attendee-name {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .attendee-details {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .attendee-status {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .badge-custom {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .badge-attended {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .result-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .student-info-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .student-info-section h5 {
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .attendees-list-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .attendees-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .attendees-header h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="attendance-header">
+        <h1>{{ event.event_name }}</h1>
+        <div class="event-meta">
+            <div class="event-meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ event.event_date.strftime('%b %d, %Y at %I:%M %p') }}</span>
+            </div>
+            <div class="event-meta-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ event.location }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number">{{ attendances|length }}</div>
+                <p>Total Registered</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number" style="color: #28a745;">{{ attendances|selectattr('is_attended', 'equalto', true)|list|length }}</div>
+                <p>Checked In</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-number" style="color: #ffc107;">{{ attendances|selectattr('is_attended', 'equalto', false)|list|length }}</div>
+                <p>Pending Check-in</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="scanner-section">
+                <h4 style="margin-bottom: 1.5rem; color: #333; font-weight: 700;">
+                    <i class="fas fa-qrcode"></i> QR Code Scanner
+                </h4>
+                
+                <div class="btn-group-custom">
+                    <button id="startScanBtn" class="btn-lg-custom" style="background: #28a745; color: white;">
+                        <i class="fas fa-camera"></i> Start Scanning
+                    </button>
+                    <button id="stopScanBtn" class="btn-lg-custom" style="background: #dc3545; color: white; display: none;">
+                        <i class="fas fa-stop-circle"></i> Stop Scanning
+                    </button>
+                    <button id="manualInputBtn" class="btn-lg-custom" style="background: #6c757d; color: white;" data-bs-toggle="modal" data-bs-target="#manualInputModal">
+                        <i class="fas fa-keyboard"></i> Manual Input
+                    </button>
+                </div>
+                
+                <div id="scannerContainer" style="display: none; margin-top: 20px; text-align: center;">
+                    <video id="camera" autoplay muted style="width: 100%; max-width: 500px; border-radius: 12px; border: 3px solid #667eea;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <p style="margin-top: 1rem; color: #667eea; font-weight: 600;">
+                        <i class="fas fa-arrow-down"></i> Position QR code in front of camera
+                    </p>
+                </div>
+                
+                <div id="resultContainer" style="display: none; margin-top: 2rem;">
+                    <div class="result-card">
+                        <div class="student-info-section">
+                            <h5><i class="fas fa-user"></i> Student Information</h5>
+                            <div class="info-row">
+                                <span>Name:</span>
+                                <strong><span id="studentName"></span></strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Email:</span>
+                                <strong><span id="studentEmail"></span></strong>
+                            </div>
+                            <div class="info-row">
+                                <span>Student Number:</span>
+                                <strong><span id="studentNumber"></span></strong>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                            <h5 style="margin-bottom: 1rem; color: #333; font-weight: 700;">
+                                <i class="fas fa-info-circle"></i> Event Details
+                            </h5>
+                            <div class="info-row" style="border: none; color: #666;">
+                                <span>Event:</span>
+                                <strong style="color: #333;"><span id="eventName"></span></strong>
+                            </div>
+                            <div class="info-row" style="border: none; color: #666;">
+                                <span>Date:</span>
+                                <strong style="color: #333;"><span id="eventDate"></span></strong>
+                            </div>
+                            <div class="info-row" style="border: none; color: #666;">
+                                <span>Location:</span>
+                                <strong style="color: #333;"><span id="eventLocation"></span></strong>
+                            </div>
+                        </div>
+                        
+                        <div id="attendanceStatus" style="display: none; margin-bottom: 1.5rem;"></div>
+                        
+                        <div class="btn-group-custom">
+                            <button id="markAttendedBtn" class="btn-lg-custom" style="background: #28a745; color: white;">
+                                <i class="fas fa-check"></i> Mark as Attended
+                            </button>
+                            <button id="resetBtn" class="btn-lg-custom" style="background: #667eea; color: white;">
+                                <i class="fas fa-redo"></i> Scan Another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="attendees-list-section">
+                <div class="attendees-header">
+                    <h5>Attendees List</h5>
+                    <span class="badge" style="background: #667eea; color: white;">{{ attendances|length }}</span>
+                </div>
+                
+                <div style="max-height: 600px; overflow-y: auto;">
+                    {% for attendance in attendances %}
+                    <div class="attendee-card {% if attendance.is_attended %}attended{% endif %}">
+                        <div class="attendee-info">
+                            <div class="attendee-name">{{ attendance.user.first_name }} {{ attendance.user.last_name }}</div>
+                            <div class="attendee-details">
+                                <i class="fas fa-id-card"></i> {{ attendance.user.student_number }}
+                            </div>
+                            <div class="attendee-details">
+                                <i class="fas fa-envelope"></i> {{ attendance.user.email[:25] }}...
+                            </div>
+                        </div>
+                        <div class="attendee-status">
+                            {% if attendance.is_attended %}
+                            <span class="badge-custom badge-attended">
+                                <i class="fas fa-check-circle"></i> Attended
+                            </span>
+                            {% if attendance.checked_in_at %}
+                            <small style="color: #666; font-size: 0.8rem;">{{ attendance.checked_in_at.strftime('%I:%M %p') }}</small>
+                            {% endif %}
+                            {% else %}
+                            <span class="badge-custom badge-pending">
+                                <i class="fas fa-clock"></i> Pending
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Input Modal -->
+<div class="modal fade" id="manualInputModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manually Enter QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Enter the QR code data directly (format: event_id|user_id|token)</p>
+                <input type="text" id="manualQRInput" class="form-control" placeholder="Enter QR code data...">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="processManualBtn">Process QR Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+let scanning = false;
+let stream = null;
+let currentAttendanceId = null;
+
+document.getElementById('startScanBtn').addEventListener('click', startScanning);
+document.getElementById('stopScanBtn').addEventListener('click', stopScanning);
+document.getElementById('resetBtn').addEventListener('click', resetScanner);
+document.getElementById('markAttendedBtn').addEventListener('click', markAsAttended);
+document.getElementById('processManualBtn').addEventListener('click', processManualInput);
+
+async function startScanning() {
+    const scannerContainer = document.getElementById('scannerContainer');
+    const video = document.getElementById('camera');
+    
+    scannerContainer.style.display = 'block';
+    document.getElementById('startScanBtn').style.display = 'none';
+    document.getElementById('stopScanBtn').style.display = 'inline-block';
+    
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        video.srcObject = stream;
+        
+        // Wait for video to be ready
+        video.onloadedmetadata = () => {
+            video.play();
+            scanning = true;
+            scanQRCode();
+        };
+    } catch (err) {
+        alert('Cannot access camera: ' + err.message);
+        document.getElementById('startScanBtn').style.display = 'inline-block';
+        document.getElementById('stopScanBtn').style.display = 'none';
+        scannerContainer.style.display = 'none';
+    }
+}
+
+function stopScanning() {
+    scanning = false;
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+    document.getElementById('scannerContainer').style.display = 'none';
+    document.getElementById('startScanBtn').style.display = 'inline-block';
+    document.getElementById('stopScanBtn').style.display = 'none';
+}
+
+async function scanQRCode() {
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+    // Set canvas size to match video
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    
+    let scanCount = 0;
+    
+    const scanFrame = () => {
+        if (!scanning) return;
+        
+        try {
+            // Draw current video frame to canvas
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: 'dontInvert'
+                });
+                
+                if (code) {
+                    processQRCode(code.data);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.error('QR scan error:', e);
+        }
+        
+        // Scan every 100ms
+        scanCount++;
+        if (scanCount < 500) { // Stop after 50 seconds if no code found
+            setTimeout(scanFrame, 100);
+        } else if (scanning) {
+            alert('QR code not detected. Please try again.');
+            resetScanner();
+        }
+    };
+    
+    scanFrame();
+}
+
+async function processQRCode(qrData) {
+    scanning = false;
+    
+    if (!qrData || qrData.trim() === '') {
+        alert('Invalid QR code data');
+        startScanning();
+        return;
+    }
+    
+    try {
+        const response = await fetch('/events/api/scan-qr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ qr_data: qrData })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentAttendanceId = data.attendance_id;
+            
+            // Display student info
+            document.getElementById('studentName').textContent = data.student.name;
+            document.getElementById('studentEmail').textContent = data.student.email;
+            document.getElementById('studentNumber').textContent = data.student.student_number;
+            
+            document.getElementById('eventName').textContent = data.event.name;
+            document.getElementById('eventDate').textContent = data.event.date;
+            document.getElementById('eventLocation').textContent = data.event.location;
+            
+            // Show attendance status
+            const statusDiv = document.getElementById('attendanceStatus');
+            if (data.is_attended) {
+                statusDiv.innerHTML = '<strong>✓ Already Marked as Attended</strong>';
+                statusDiv.className = 'alert alert-success';
+                document.getElementById('markAttendedBtn').disabled = true;
+            } else {
+                statusDiv.innerHTML = '<strong>⏳ Not Yet Checked In</strong>';
+                statusDiv.className = 'alert alert-warning';
+                document.getElementById('markAttendedBtn').disabled = false;
+            }
+            statusDiv.style.display = 'block';
+            
+            document.getElementById('scannerContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+            document.getElementById('stopScanBtn').style.display = 'none';
+        } else {
+            alert('Error: ' + data.error);
+            startScanning();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error processing QR code: ' + error.message);
+        startScanning();
+    }
+}
+
+async function markAsAttended() {
+    try {
+        const response = await fetch('/events/api/mark-attended', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ attendance_id: currentAttendanceId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const statusDiv = document.getElementById('attendanceStatus');
+            statusDiv.innerHTML = '<strong>✓ Attendance Recorded!</strong>';
+            statusDiv.className = 'alert alert-success';
+            document.getElementById('markAttendedBtn').disabled = true;
+            
+            // Reload attendance list
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Error marking attendance: ' + error.message);
+    }
+}
+
+function resetScanner() {
+    document.getElementById('resultContainer').style.display = 'none';
+    currentAttendanceId = null;
+    startScanning();
+}
+
+function processManualInput() {
+    const qrData = document.getElementById('manualQRInput').value.trim();
+    if (!qrData) {
+        alert('Please enter QR code data');
+        return;
+    }
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('manualInputModal'));
+    modal.hide();
+    
+    processQRCode(qrData);
+}
+</script>
+{% endblock %}

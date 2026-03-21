@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}Notifications - DUT Club Management{% endblock %}
+{% block content %}
+<div class="container" style="padding: 40px;">
+    <h2 style="color: white; margin-bottom: 30px;">
+        Notifications 
+        {% if unread_count > 0 %}
+        <span class="badge bg-primary ms-2">{{ unread_count }} unread</span>
+        {% endif %}
+    </h2>
+    
+    {% if notifications %}
+    <div class="mb-3 text-end">
+        <button class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: #fff;" onclick="markAllRead()">
+            Mark All as Read
+        </button>
+    </div>
+    <div class="notifications-grid">
+        {% for notification in notifications %}
+        <div class="glass-card-notification {% if not notification.is_read %}unread{% endif %}" 
+             onclick="handleNotificationClick('{{ notification.link }}', {{ notification.id }})">
+            <div class="notification-content">
+                <h3>{{ notification.title }}</h3>
+                <p>{{ notification.message }}</p>
+                <span class="notification-time">{{ notification.created_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+            </div>
+            <button class="btn-delete-notification" onclick="event.stopPropagation(); deleteNotification({{ notification.id }})" title="Delete">
+                🗑️
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="glass-card-notification text-center">
+        <span style="font-size: 3rem;">🔔</span>
+        <h3>No Notifications</h3>
+        <p>You are all caught up!</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function handleNotificationClick(link, notificationId) {
+    fetch('/notifications/api/mark-read/' + notificationId, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).then(function() {
+        if (link) {
+            window.location.href = link;
+        } else {
+            location.reload();
+        }
+    });
+}
+
+function deleteNotification(notificationId) {
+    if (!confirm('Delete this notification?')) return;
+    
+    fetch('/notifications/api/delete/' + notificationId, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).then(function(response) {
+        return response.json();
+    }).then(function(data) {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to delete notification');
+        }
+    });
+}
+
+function markAllRead() {
+    fetch('/notifications/api/mark-all-read', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).then(function(response) {
+        return response.json();
+    }).then(function(data) {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+
+<style>
+.notifications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.glass-card-notification {
+    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.glass-card-notification:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.glass-card-notification.unread {
+    border-left: 4px solid #667eea;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.btn-delete-notification {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    font-size: 1.2rem;
+}
+
+.btn-delete-notification:hover {
+    opacity: 1;
+}
+
+.glass-card-notification h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+}
+
+.glass-card-notification p {
+    margin: 0 0 15px 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.notification-time {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.badge {
+    font-size: 0.8rem;
+    vertical-align: middle;
+}
+</style>
+{% endblock %}

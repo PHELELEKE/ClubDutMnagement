@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Requests - DUT Club Management{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <a href="/chat" class="btn btn-sm mb-2" style="background: rgba(255,255,255,0.2); color: #fff;">← Back</a>
+                        <h2 style="color: #fff;">📋 Member Requests</h2>
+                    </div>
+                </div>
+                
+                <!-- Pending Requests -->
+                <h4 style="color: #fff; margin-bottom: 1rem;">Pending Requests</h4>
+                {% if pending_requests %}
+                    {% for req in pending_requests %}
+                    <div class="request-card">
+                        <div class="request-info">
+                            <h5>{{ req.user.first_name }} {{ req.user.last_name }}</h5>
+                            <p>
+                                {% if req.request_type == 'leave' %}
+                                <span class="badge bg-warning">Leave Club</span>
+                                {% else %}
+                                <span class="badge bg-info">Move Club</span>
+                                {% endif %}
+                                - {{ req.club.club_name }}
+                                {% if req.request_type == 'move' %}
+                                → {{ req.target_club.club_name }}
+                                {% endif %}
+                            </p>
+                            {% if req.message %}
+                            <p style="color: rgba(255,255,255,0.7);">{{ req.message }}</p>
+                            {% endif %}
+                            <small style="color: rgba(255,255,255,0.5);">{{ req.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                        </div>
+                        <div class="request-actions">
+                            <form method="POST" action="/chat/request/{{ req.id }}/process" class="d-inline">
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="btn btn-sm" style="background: rgba(16,185,129,0.3); color: #fff;">✓ Approve</button>
+                            </form>
+                            <form method="POST" action="/chat/request/{{ req.id }}/process" class="d-inline">
+                                <input type="hidden" name="action" value="deny">
+                                <button type="submit" class="btn btn-sm" style="background: rgba(239,68,68,0.3); color: #fff;">✕ Deny</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: rgba(255,255,255,0.6);">No pending requests.</p>
+                {% endif %}
+                
+                <hr style="border-color: rgba(255,255,255,0.2); margin: 2rem 0;">
+                
+                <!-- Processed Requests -->
+                <h4 style="color: #fff; margin-bottom: 1rem;">Recent Requests</h4>
+                {% if processed_requests %}
+                    {% for req in processed_requests %}
+                    <div class="request-card processed">
+                        <div class="request-info">
+                            <h5>{{ req.user.first_name }} {{ req.user.last_name }}</h5>
+                            <p>
+                                {% if req.request_type == 'leave' %}
+                                <span class="badge bg-secondary">Leave Club</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Move Club</span>
+                                {% endif %}
+                                - {{ req.club.club_name }}
+                                {% if req.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% else %}
+                                <span class="badge bg-danger">Denied</span>
+                                {% endif %}
+                            </p>
+                            <small style="color: rgba(255,255,255,0.5);">{{ req.created_at.strftime('%B %d, %Y') }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: rgba(255,255,255,0.6);">No processed requests.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.request-card {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.request-card.processed {
+    opacity: 0.7;
+}
+
+.request-info h5 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.request-info p {
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 0.25rem;
+}
+
+.request-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+</style>
+{% endblock %}
+

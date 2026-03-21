@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Manage Clubs - Admin{% endblock %}
+{% block content %}
+<div class="admin-dashboard">
+
+<!-- Header -->
+<div class="admin-header">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="admin-title">🎭 Club Management</h1>
+      <p class="admin-subtitle">View, approve, and manage all clubs in the system</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      <div class="header-actions">
+        <a href="/dashboard/admin" class="btn btn-back">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">🎭</span>
+        <div class="mini-stat-info">
+          <h4>{{ clubs|length }}</h4>
+          <p>Total Clubs</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">✅</span>
+        <div class="mini-stat-info">
+          <h4>{{ clubs|selectattr('status', 'equalto', 'active')|list|length }}</h4>
+          <p>Active Clubs</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">⏳</span>
+        <div class="mini-stat-info">
+          <h4>{{ clubs|selectattr('status', 'equalto', 'pending')|list|length }}</h4>
+          <p>Pending Approval</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clubs Table -->
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h3>📋 All Clubs</h3>
+    <div class="search-box-admin">
+      <input type="text" id="clubSearch" placeholder="Search clubs..." class="form-control">
+    </div>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if clubs %}
+      <div class="table-responsive">
+        <table class="table-admin">
+          <thead>
+            <tr>
+              <th>Club</th>
+              <th>Category</th>
+              <th>Creator</th>
+              <th>Status</th>
+              <th>Members</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clubsTableBody">
+            {% for c in clubs %}
+              <tr class="club-row" data-name="{{ c.club_name|lower }}" data-category="{{ c.category|lower }}">
+                <td>
+                  <div class="club-cell">
+                    <div class="club-avatar">🎭</div>
+                    <div class="club-details">
+                      <h4>{{ c.club_name }}</h4>
+                      <p>{{ c.description[:50] if c.description else '' }}...</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="category-badge">{{ c.category }}</span>
+                </td>
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar-small">{{ c.creator.first_name[0] }}{{ c.creator.last_name[0] }}</div>
+                    <div class="user-details">
+                      <h4>{{ c.creator.first_name }} {{ c.creator.last_name }}</h4>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {% if c.status == 'active' %}
+                    <span class="status-badge status-active">Active</span>
+                  {% elif c.status == 'pending' %}
+                    <span class="status-badge status-pending">Pending</span>
+                  {% elif c.status == 'rejected' %}
+                    <span class="status-badge status-rejected">Rejected</span>
+                  {% elif c.status == 'pending_deletion' %}
+                    <span class="status-badge status-rejected">Deletion Request</span>
+                  {% else %}
+                    <span class="status-badge">{{ c.status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="members-count">
+                    👥 {{ c.members|length }} members
+                  </span>
+                </td>
+                <td>{{ c.created_at.strftime('%b %d, %Y') }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <a href="/clubs/{{ c.id }}" class="btn-action-small btn-view" title="View Details">
+                      👁️ View
+                    </a>
+                    {% if c.status == 'pending' %}
+                      <form action="/admin/clubs/approve/{{ c.id }}" method="post" class="d-inline">
+                        <button type="submit" class="btn-action-small btn-approve" title="Approve Club">
+                          ✅ Approve
+                        </button>
+                      </form>
+                      <form action="/admin/clubs/reject/{{ c.id }}" method="post" class="d-inline">
+                        <button type="submit" class="btn-action-small btn-reject" title="Reject Club">
+                          ❌ Reject
+                        </button>
+                      </form>
+                    {% elif c.status == 'pending_deletion' %}
+                      <form action="/admin/clubs/approve-delete/{{ c.id }}" method="post" class="d-inline">
+                        <button type="submit" class="btn-action-small btn-delete" title="Delete Club">
+                          🗑️ Confirm Delete
+                        </button>
+                      </form>
+                      <form action="/admin/clubs/deny-delete/{{ c.id }}" method="post" class="d-inline">
+                        <button type="submit" class="btn-action-small btn-approve" title="Deny Deletion">
+                          ✅ Deny Delete
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-admin">
+        <span class="empty-icon">🎭</span>
+        <h3>No clubs yet</h3>
+        <p>Clubs will appear here once created</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('clubSearch');
+    const clubRows = document.querySelectorAll('.club-row');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        clubRows.forEach(row => {
+            const name = row.dataset.name;
+            const category = row.dataset.category;
+            
+            if (name.includes(searchTerm) || category.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Conversation - DUT Club Management{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <a href="/chat" class="btn btn-sm mb-2" style="background: rgba(255,255,255,0.2); color: #fff;">← Back</a>
+                        <h3 style="color: #fff;">{{ other_user.first_name }} {{ other_user.last_name }}</h3>
+                        {% if conversation.subject %}
+                        <p style="color: rgba(255,255,255,0.7);">{{ conversation.subject }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Messages Container -->
+                <div id="messagesContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem;">
+                    <div id="messagesList">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Message Input -->
+                <div class="message-input">
+                    <form id="messageForm">
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" 
+                                   placeholder="Type your message..." 
+                                   style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                            <button type="submit" class="btn" style="background: rgba(102,126,234,0.8); color: #fff;">
+                                Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.message-item {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.message-item.sent {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.message-item.sent .message-bubble {
+    background: rgba(102,126,234,0.3);
+    border-color: rgba(102,126,234,0.3);
+}
+
+.message-bubble p {
+    color: #fff;
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.message-bubble small {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.7rem;
+}
+
+.message-time {
+    display: block;
+    text-align: right;
+    margin-top: 0.25rem;
+}
+
+.message-input .form-control:focus {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(102,126,234,0.5);
+    color: #fff;
+    box-shadow: none;
+}
+
+.message-input .form-control::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+</style>
+
+<script>
+const conversationId = {{ conversation.id }};
+
+function loadMessages() {
+    fetch('/chat/api/conversation/' + conversationId + '/messages')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('messagesList');
+            container.innerHTML = data.map(function(msg) {
+                var bubbleClass = msg.is_mine ? 'sent' : 'received';
+                return '<div class="message-item ' + bubbleClass + '">' +
+                    '<div class="message-bubble">' +
+                    '<p>' + msg.message + '</p>' +
+                    '<small class="message-time">' + msg.created_at + '</small>' +
+                    '</div></div>';
+            }).join('');
+            
+            // Scroll to bottom
+            document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+        })
+        .catch(function(err) { console.error('Error loading messages:', err); });
+}
+
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var input = document.getElementById('messageInput');
+    var message = input.value.trim();
+    
+    if (!message) return;
+    
+    fetch('/chat/api/conversation/' + conversationId + '/send', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: message})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            input.value = '';
+            loadMessages();
+        }
+    })
+    .catch(function(err) { console.error('Error sending message:', err); });
+});
+
+// Load messages on page load
+loadMessages();
+
+// Refresh messages every 5 seconds
+setInterval(loadMessages, 5000);
+</script>
+{% endblock %}
+

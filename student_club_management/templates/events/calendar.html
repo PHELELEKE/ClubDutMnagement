@@ -1,0 +1,624 @@
+{% extends 'base.html' %}
+{% block title %}Events Calendar - DUT Club Management{% endblock %}
+{% block content %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.0.0/index.global.min.css' rel='stylesheet' />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* Calendar Page Enhanced Styles */
+.events-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Animated Header */
+.calendar-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calendar-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.calendar-header h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.calendar-header p {
+    color: rgba(255,255,255,0.8);
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Glass Card Enhanced */
+.glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Calendar Container */
+#calendar {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    padding: 1rem;
+}
+
+/* FullCalendar Customization */
+.fc {
+    font-family: 'Poppins', sans-serif;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.8rem !important;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.fc .fc-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+}
+
+.fc .fc-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
+.fc .fc-daygrid-day {
+    transition: all 0.2s ease;
+}
+
+.fc .fc-daygrid-day:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+}
+
+.fc .fc-daygrid-day-number {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    padding: 8px;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.fc .fc-event {
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 4px 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer;
+}
+
+.fc .fc-event:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.fc .fc-event-main {
+    padding: 2px 4px;
+}
+
+.fc .fc-day-today {
+    background: rgba(102, 126, 234, 0.15) !important;
+    border: 2px solid rgba(102, 126, 234, 0.5) !important;
+}
+
+.fc .fc-timegrid-slot {
+    height: 3rem !important;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Event Stats Card */
+.stats-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    animation: slideIn 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.stats-card h5 {
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Upcoming Events List */
+.upcoming-events {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.upcoming-events::-webkit-scrollbar {
+    width: 6px;
+}
+
+.upcoming-events::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+.upcoming-events::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+.event-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.event-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.event-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.event-item:hover::before {
+    transform: scaleY(1);
+}
+
+.event-item h6 {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.event-item .event-date {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.event-item .event-location {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Event Countdown */
+.countdown-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Category Filter */
+.filter-section {
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.6s ease-out 0.3s both;
+}
+
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: transparent;
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .calendar-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .calendar-header {
+        padding: 1.5rem;
+    }
+    
+    .glass-card {
+        margin-bottom: 1rem;
+    }
+    
+    .upcoming-events {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 575px) {
+    .calendar-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .category-filters {
+        justify-content: center;
+    }
+    
+    .filter-btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* Loading Animation */
+.loading-pulse {
+    animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+</style>
+
+<div class="events-page">
+<!-- Header -->
+<div class="calendar-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2>📅 Events Calendar</h2>
+            <p>Discover and manage all club events in one place</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            {% if current_user.role == 'leader' %}
+                <a href="/events/create" class="btn btn-lg" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 15px; font-weight: 600; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                    <i class="fas fa-plus-circle me-2"></i>Create Event
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Category Filters -->
+<div class="filter-section">
+    <div class="category-filters">
+        <button class="filter-btn active" data-filter="all">
+            <i class="fas fa-calendar-check"></i> All Events
+        </button>
+        <button class="filter-btn" data-filter="approved">
+            <i class="fas fa-check-circle"></i> Upcoming
+        </button>
+        <button class="filter-btn" data-filter="ongoing">
+            <i class="fas fa-spinner"></i> Ongoing
+        </button>
+        <button class="filter-btn" data-filter="completed">
+            <i class="fas fa-check-double"></i> Past
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Calendar -->
+    <div class="col-lg-9 col-md-12">
+        <div class="glass-card">
+            <div id='calendar'></div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-3 col-md-12">
+        <!-- Stats Card -->
+        <div class="glass-card stats-card">
+            <h5><i class="fas fa-chart-line"></i> Event Stats</h5>
+            <div class="stat-number" id="event-count">0</div>
+            <p class="text-light mb-0">Total Events</p>
+        </div>
+        
+        <!-- Upcoming Events -->
+        <div class="glass-card">
+            <h5 class="mb-3"><i class="fas fa-clock"></i> Upcoming Events</h5>
+            <div id="event-list" class="upcoming-events">
+                <p class="text-muted loading-pulse">Loading events...</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.0.0/index.global.min.js'></script>
+<script>
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+// Format date safely
+function formatDate(dateStr) {
+    if (!dateStr) return 'Date TBA';
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return 'Date TBA';
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+        return 'Date TBA';
+    }
+}
+
+// Calculate days until event
+function getDaysUntil(dateStr) {
+    try {
+        const eventDate = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        eventDate.setHours(0, 0, 0, 0);
+        const diffTime = eventDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Get countdown text
+function getCountdownText(dateStr) {
+    const days = getDaysUntil(dateStr);
+    if (days === null) return '';
+    if (days < 0) return 'Past';
+    if (days === 0) return 'Today!';
+    if (days === 1) return 'Tomorrow';
+    if (days <= 7) return `In ${days} days`;
+    return '';
+}
+
+// Get event color based on status and days until
+function getEventColor(eventData) {
+    const days = getDaysUntil(eventData.start);
+    if (eventData.status === 'completed') return '#6b7280';
+    if (eventData.status === 'ongoing') return '#f59e0b';
+    if (days <= 1) return '#ef4444';
+    if (days <= 3) return '#f59e0b';
+    if (days <= 7) return '#10b981';
+    return '#667eea';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    
+    // Parse events data safely
+    let eventsData = [];
+    try {
+        eventsData = JSON.parse('{{ events | tojson | safe }}');
+    } catch (e) {
+        console.error('Error parsing events data:', e);
+        eventsData = [];
+    }
+    
+    // Add color and status to events
+    eventsData = eventsData.map(e => ({
+        ...e,
+        color: getEventColor(e)
+    }));
+    
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        events: eventsData,
+        eventClick: function(info) {
+            window.location.href = info.event.url;
+        },
+        height: 'auto',
+        contentHeight: 'auto',
+        dayMaxEvents: 3,
+        moreLinkClick: 'popover',
+        eventDisplay: 'block',
+        nowIndicator: true,
+        selectable: true,
+        editable: false,
+        initialDate: new Date()
+    });
+    calendar.render();
+    
+    // Update event count
+    document.getElementById('event-count').textContent = eventsData.length;
+    
+    // Populate event list
+    const eventList = document.getElementById('event-list');
+    
+    // Sort by date and filter upcoming
+    const upcomingEvents = eventsData
+        .filter(e => getDaysUntil(e.start) >= 0)
+        .sort((a, b) => new Date(a.start) - new Date(b.start))
+        .slice(0, 10);
+    
+    if (upcomingEvents.length > 0) {
+        eventList.innerHTML = upcomingEvents.map(function(e) {
+            const title = escapeHtml(e.title);
+            const date = formatDate(e.start);
+            const eventId = encodeURIComponent(e.id);
+            const countdown = getCountdownText(e.start);
+            const location = e.extendedProps?.location || 'TBA';
+            
+            return `<a href="/events/${eventId}" class="event-item text-decoration-none">
+                <h6>${title}</h6>
+                <div class="event-date">
+                    <i class="far fa-calendar-alt"></i> ${date}
+                </div>
+                <div class="event-location">
+                    <i class="fas fa-map-marker-alt"></i> ${escapeHtml(location)}
+                </div>
+                ${countdown ? `<span class="countdown-badge">${countdown}</span>` : ''}
+            </a>`;
+        }).join('');
+    } else {
+        eventList.innerHTML = '<p class="text-muted text-center py-4">No upcoming events</p>';
+    }
+    
+    // Category filter functionality
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active state
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            let filteredEvents;
+            
+            if (filter === 'all') {
+                filteredEvents = eventsData;
+            } else {
+                filteredEvents = eventsData.filter(e => e.status === filter);
+            }
+            
+            // Clear and re-add events
+            calendar.removeAllEvents();
+            calendar.addEventSource(filteredEvents);
+            
+            // Update count
+            document.getElementById('event-count').textContent = filteredEvents.length;
+        });
+    });
+});
+</script>
+{% endblock %}

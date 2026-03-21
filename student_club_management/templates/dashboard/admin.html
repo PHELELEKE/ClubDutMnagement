@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - DUT Club Management{% endblock %}
+{% block content %}
+<div class="admin-dashboard">
+
+<!-- Header -->
+<div class="admin-header">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="admin-title">⚙️ System Administration</h1>
+      <p class="admin-subtitle">Manage users, clubs, events, and system settings</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      <div class="d-flex gap-2 justify-content-lg-end">
+        <a href="/announcements/create" class="btn btn-create-announcement-admin">
+          <span>📢</span> Create Announcement
+        </a>
+        <a href="/admin/settings" class="btn btn-settings">
+          <span>⚡</span> System Settings
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-admin stat-users">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ total_users }}</h3>
+          <p class="stat-label">Total Users</p>
+        </div>
+        <div class="stat-bg">👥</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-admin stat-clubs">
+        <div class="stat-icon">🎭</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ total_clubs }}</h3>
+          <p class="stat-label">Total Clubs</p>
+        </div>
+        <div class="stat-bg">🎭</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-admin stat-pending">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ pending_clubs }}</h3>
+          <p class="stat-label">Pending Approval</p>
+        </div>
+        <div class="stat-bg">⏳</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-admin stat-events">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <h3 class="stat-number">{{ active_events }}</h3>
+          <p class="stat-label">Active Events</p>
+        </div>
+        <div class="stat-bg">📅</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="admin-content-grid">
+  <div class="row g-4">
+    
+    <!-- Pending Approvals -->
+    <div class="col-lg-6">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>⏳ Pending Club Approvals</h3>
+          <span class="badge-pending">{{ pending_clubs }} pending</span>
+        </div>
+        <div class="admin-card-body">
+          {% if pending_club_list %}
+            <div class="pending-list">
+              {% for club in pending_club_list %}
+                <div class="pending-item">
+                  <div class="pending-info">
+                    <h4>{{ club.club_name }}</h4>
+                    <p>
+                      <span class="creator">👤 {{ club.creator.first_name }} {{ club.creator.last_name }}</span>
+                      <span class="date">📅 {{ club.created_at.strftime('%b %d, %Y') }}</span>
+                    </p>
+                  </div>
+                  <div class="pending-actions">
+                    <form action="/admin/clubs/approve/{{ club.id }}" method="post" class="d-inline">
+                      <button class="btn-action btn-approve">✓ Approve</button>
+                    </form>
+                    <form action="/admin/clubs/reject/{{ club.id }}" method="post" class="d-inline">
+                      <button class="btn-action btn-reject">✗ Reject</button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-admin">
+              <span class="empty-icon">✅</span>
+              <p>No pending clubs to review</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-lg-6">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>🎯 Quick Actions</h3>
+        </div>
+        <div class="admin-card-body">
+          <div class="quick-actions-grid">
+            <a href="/admin/users" class="quick-action-card">
+              <span class="action-icon">👥</span>
+              <span class="action-label">Manage Users</span>
+              <span class="action-arrow">→</span>
+            </a>
+            <a href="/admin/students" class="quick-action-card">
+              <span class="action-icon">🎓</span>
+              <span class="action-label">Manage Students</span>
+              <span class="action-arrow">→</span>
+            </a>
+            <a href="/admin/clubs" class="quick-action-card">
+              <span class="action-icon">🎭</span>
+              <span class="action-label">Manage Clubs</span>
+              <span class="action-arrow">→</span>
+            </a>
+            <a href="/admin/events" class="quick-action-card">
+              <span class="action-icon">📅</span>
+              <span class="action-label">Manage Events</span>
+              <span class="action-arrow">→</span>
+            </a>
+            <a href="/admin/settings" class="quick-action-card">
+              <span class="action-icon">⚙️</span>
+              <span class="action-label">Settings</span>
+              <span class="action-arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="admin-content-grid">
+  <div class="row g-4">
+    
+    <!-- Recent Users -->
+    <div class="col-lg-6">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>👥 Recent Users</h3>
+          <a href="/admin/users" class="view-all-link">View All →</a>
+        </div>
+        <div class="admin-card-body">
+          {% if recent_users %}
+            <div class="recent-list">
+              {% for user in recent_users %}
+                <div class="recent-item">
+                  <div class="recent-avatar">
+                    {{ user.first_name[0] }}{{ user.last_name[0] }}
+                  </div>
+                  <div class="recent-info">
+                    <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                    <p>{{ user.email }}</p>
+                  </div>
+                  <div class="recent-meta">
+                    <span class="role-badge role-{{ user.role }}">{{ user.role }}</span>
+                    <span class="date">{{ user.created_at.strftime('%b %d') }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-admin">
+              <p>No users yet</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent Clubs -->
+    <div class="col-lg-6">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3>🎭 Recent Clubs</h3>
+          <a href="/admin/clubs" class="view-all-link">View All →</a>
+        </div>
+        <div class="admin-card-body">
+          {% if recent_clubs %}
+            <div class="recent-list">
+              {% for club in recent_clubs %}
+                <div class="recent-item">
+                  <div class="recent-avatar club-avatar">
+                    🎭
+                  </div>
+                  <div class="recent-info">
+                    <h4>{{ club.club_name }}</h4>
+                    <p>{{ club.category }}</p>
+                  </div>
+                  <div class="recent-meta">
+                    <span class="status-badge status-{{ club.status }}">{{ club.status }}</span>
+                    <span class="date">{{ club.created_at.strftime('%b %d') }}</span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-admin">
+              <p>No clubs yet</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+</div>
+{% endblock %}
+

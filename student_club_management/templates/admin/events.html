@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block title %}Manage Events - Admin{% endblock %}
+{% block content %}
+<div class="glass-card mb-4">
+  <h2>Event Management 📅</h2>
+  <p class="lead">Review and approve all events</p>
+</div>
+
+<!-- Pending Events Section -->
+<div class="mb-4">
+  <h4 class="mb-3">⏳ Pending Approval</h4>
+  {% set pending_events = events | selectattr('status', 'equalto', 'pending') | list %}
+  {% if pending_events %}
+    <div class="row g-3">
+      {% for e in pending_events %}
+        <div class="col-lg-6">
+          <div class="glass-card h-100 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">{{ e.event_name }}</h5>
+              <span class="badge {% if e.requires_club %}bg-warning{% else %}bg-success{% endif %}">
+                {% if e.requires_club %}👥 Team{% else %}👤 Open{% endif %}
+              </span>
+            </div>
+            
+            <p class="text-muted small mb-2">{{ e.description[:80] }}...</p>
+            
+            <div class="event-meta mb-3 small">
+              <p class="mb-1"><strong>Organizer:</strong> {{ e.creator.first_name }} {{ e.creator.last_name }}</p>
+              <p class="mb-1"><strong>Date:</strong> {{ e.event_date.strftime('%b %d, %Y %I:%M %p') if e.event_date else '-' }}</p>
+              <p class="mb-1"><strong>Location:</strong> {{ e.location }}</p>
+              {% if e.requires_club %}
+                <p class="mb-0"><strong>Team Requirements:</strong> 
+                  {% if e.min_club_members %}Min {{ e.min_club_members }}{% endif %}
+                  {% if e.min_club_members and e.max_club_members %} - {% endif %}
+                  {% if e.max_club_members %}Max {{ e.max_club_members }}{% endif %}
+                </p>
+              {% endif %}
+            </div>
+            
+            <div class="mt-auto d-flex gap-2">
+              <form method="POST" action="/admin/events/approve/{{ e.id }}" style="flex:1;">
+                <button type="submit" class="btn btn-success w-100 btn-sm">✓ Approve</button>
+              </form>
+              <form method="POST" action="/admin/events/reject/{{ e.id }}" style="flex:1;">
+                <button type="submit" class="btn btn-danger w-100 btn-sm">✗ Reject</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="glass-card">
+      <p class="text-muted mb-0">✓ No pending events - all caught up!</p>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Completed Events with Attendance Section -->
+{% set completed_events = events | selectattr('status', 'equalto', 'completed') | list %}
+{% if completed_events %}
+<div class="mb-4">
+  <h4 class="mb-3">✅ Completed Events - Attendance Records</h4>
+  <div class="accordion" id="completedEventsAccordion">
+    {% for e in completed_events %}
+      {% set registered = e.attendances|length %}
+      {% set attended = e.attendances|selectattr('is_attended', 'equalto', True)|list|length %}
+      <div class="accordion-item glass-card mb-3">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvent{{ e.id }}">
+            <div class="d-flex justify-content-between align-items-center w-100 me-3">
+              <span><strong>{{ e.event_name }}</strong></span>
+              <span class="badge bg-info">
+                {{ attended }} / {{ registered }} attended
+              </span>
+            </div>
+          </button>
+        </h2>
+        <div id="collapseEvent{{ e.id }}" class="accordion-collapse collapse" data-bs-parent="#completedEventsAccordion">
+          <div class="accordion-body">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <strong>📅 Date:</strong> {{ e.event_date.strftime('%b %d, %Y %I:%M %p') if e.event_date else '-' }}
+              </div>
+              <div class="col-md-4">
+                <strong>📍 Location:</strong> {{ e.location }}
+              </div>
+              <div class="col-md-4">
+                <strong>Organizer:</strong> {{ e.creator.first_name }} {{ e.creator.last_name }}
+              </div>
+            </div>
+            
+            <h6>Attendance List ({{ attended }}/{{ registered }})</h6>
+            {% if e.attendances %}
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Student Name</th>
+                      <th>Student Number</th>
+                      <th>Status</th>
+                      <th>Checked In</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for attendance in e.attendances %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ attendance.user.first_name }} {{ attendance.user.last_name }}</td>
+                        <td>{{ attendance.user.student_number }}</td>
+                        <td>
+                          {% if attendance.is_attended %}
+                            <span class="badge bg-success">✓ Attended</span>
+                          {% else %}
+                            <span class="badge bg-warning">✗ No Show</span>
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if attendance.checked_in_at %}
+                            {{ attendance.checked_in_at.strftime('%b %d, %Y %I:%M %p') }}
+                          {% else %}
+                            -
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-muted">No registrations for this event.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Ongoing Events Section -->
+{% set ongoing_events = events | selectattr('status', 'equalto', 'ongoing') | list %}
+{% if ongoing_events %}
+<div class="mb-4">
+  <h4 class="mb-3">🔴 Ongoing Events</h4>
+  <div class="row g-3">
+    {% for e in ongoing_events %}
+      {% set registered = e.attendances|length %}
+      {% set attended = e.attendances|selectattr('is_attended', 'equalto', True)|list|length %}
+      <div class="col-lg-6">
+        <div class="glass-card h-100">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0">{{ e.event_name }}</h5>
+            <span class="badge bg-info">🔴 Ongoing</span>
+          </div>
+          
+          <div class="event-meta mb-3 small">
+            <p class="mb-1"><strong>Date:</strong> {{ e.event_date.strftime('%b %d, %Y %I:%M %p') if e.event_date else '-' }}</p>
+            <p class="mb-1"><strong>Location:</strong> {{ e.location }}</p>
+            <p class="mb-0">
+              <strong>Attendance:</strong> {{ attended }} / {{ registered }} checked in
+            </p>
+          </div>
+          
+          <a href="/events/{{ e.id }}/attendance" class="btn btn-success btn-sm">📋 View Attendance</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Approved Events Section -->
+<div class="mb-4">
+  <h4 class="mb-3">✓ Approved Events</h4>
+  {% set approved_events = events | selectattr('status', 'equalto', 'approved') | list %}
+  {% if approved_events %}
+    <div class="row g-3">
+      {% for e in approved_events %}
+        <div class="col-lg-6">
+          <div class="glass-card h-100">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">{{ e.event_name }}</h5>
+              <span class="badge bg-success">✓ Approved</span>
+            </div>
+            
+            <p class="text-muted small mb-2">{{ e.description[:70] }}...</p>
+            
+            <div class="event-meta mb-3 small">
+              <p class="mb-1"><strong>Organizer:</strong> {{ e.creator.first_name }} {{ e.creator.last_name }}</p>
+              <p class="mb-1"><strong>📅 Date:</strong> {{ e.event_date.strftime('%b %d, %Y %I:%M %p') if e.event_date else '-' }}</p>
+              <p class="mb-1"><strong>📍 Location:</strong> {{ e.location }}</p>
+              <p class="mb-0"><strong>👥 Attendees:</strong> {{ e.attendees|length }}{% if e.max_attendees %}/{{ e.max_attendees }}{% endif %}</p>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <a href="/events/{{ e.id }}" class="btn btn-info btn-sm flex-grow-1">View Event</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="glass-card">
+      <p class="text-muted mb-0">No approved events.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

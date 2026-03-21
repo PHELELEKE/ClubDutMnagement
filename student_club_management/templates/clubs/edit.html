@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Edit Club - DUT Club Management{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-8 offset-md-2">
+    <div class="glass-card">
+      <h2>Edit Club Settings</h2>
+      <p class="lead">Update your club information</p>
+      
+      <form method="POST" class="mt-4">
+        <div class="form-group mb-3">
+          <label for="club_name" class="form-label">Club Name *</label>
+          <input type="text" class="form-control" id="club_name" name="club_name" value="{{ club.club_name }}" required>
+        </div>
+        
+        <div class="form-group mb-3">
+          <label for="description" class="form-label">Description *</label>
+          <textarea class="form-control" id="description" name="description" rows="5" required>{{ club.description }}</textarea>
+        </div>
+        
+        <div class="form-group mb-3">
+          <label for="category" class="form-label">Category *</label>
+          <select class="form-select" id="category" name="category" required>
+            <option value="Academic" {% if club.category == 'Academic' %}selected{% endif %}>Academic</option>
+            <option value="Sports" {% if club.category == 'Sports' %}selected{% endif %}>Sports</option>
+            <option value="Cultural" {% if club.category == 'Cultural' %}selected{% endif %}>Cultural</option>
+            <option value="Social" {% if club.category == 'Social' %}selected{% endif %}>Social</option>
+            <option value="Technical" {% if club.category == 'Technical' %}selected{% endif %}>Technical</option>
+            <option value="Arts" {% if club.category == 'Arts' %}selected{% endif %}>Arts</option>
+            <option value="Other" {% if club.category == 'Other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+        
+        <div class="form-group mb-3">
+          <label for="max_members" class="form-label">Maximum Members</label>
+          <input type="number" class="form-control" id="max_members" name="max_members" min="1" value="{{ club.max_members if club.max_members else '' }}" placeholder="Leave empty for unlimited">
+          <small class="form-text text-muted">Current members: {{ club.members|length }}</small>
+        </div>
+        
+        <div class="form-group mb-3">
+          <label for="meeting_schedule" class="form-label">Meeting Schedule</label>
+          <input type="text" class="form-control" id="meeting_schedule" name="meeting_schedule" value="{{ club.meeting_schedule or '' }}" placeholder="e.g., Every Tuesday at 5 PM">
+        </div>
+        
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success btn-lg">Save Changes</button>
+          <a href="/clubs/{{ club.id }}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

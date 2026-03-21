@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Manage Club - DUT Club Management{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="glass-card mb-4">
+      <h2>Manage {{ club.club_name }}</h2>
+      <p class="lead">Control members and club settings</p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="glass-card mb-4">
+      <h4>Quick Actions</h4>
+      <a href="/clubs/{{ club.id }}/edit" class="btn btn-primary">Edit Settings</a>
+      <form action="/clubs/{{ club.id }}/delete" method="post" class="d-inline" onsubmit="return confirm('Request club deletion? Admin will review.');">
+        <button class="btn btn-danger">Request Deletion</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="glass-card">
+      <h4>Members ({{ club.members|length }}{% if club.max_members %}/{{ club.max_members }}{% endif %})</h4>
+      {% if club.members %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for member in club.members %}
+                <tr>
+                  <td>{{ member.user.first_name }} {{ member.user.last_name }}</td>
+                  <td>{{ member.user.email }}</td>
+                  <td>
+                    <span class="badge bg-info">
+                      {{ member.role }}
+                    </span>
+                  </td>
+                  <td>{{ member.joined_date.strftime('%b %d, %Y') }}</td>
+                  <td>
+                    <form action="/clubs/{{ club.id }}/kick/{{ member.user_id }}" method="post" class="d-inline" onsubmit="return confirm('Remove this member?');">
+                      <button class="btn btn-sm btn-danger">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">No members yet</p>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="glass-card">
+      <h5>Club Info</h5>
+      <ul class="list-unstyled">
+        <li><strong>Category:</strong> {{ club.category }}</li>
+        <li><strong>Status:</strong> {{ club.status }}</li>
+        <li><strong>Max Members:</strong> {% if club.max_members %}{{ club.max_members }}{% else %}Unlimited{% endif %}</li>
+        <li><strong>Created:</strong> {{ club.created_at.strftime('%b %d, %Y') }}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

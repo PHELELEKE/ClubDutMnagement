@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% block title %}Browse Clubs - DUT Club Management{% endblock %}
+{% block content %}
+<div class="clubs-page">
+
+<!-- Header Section -->
+<div class="clubs-header">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="page-title">Discover Clubs 🎭</h1>
+      <p class="page-subtitle">Find and join clubs that match your interests</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      {% if current_user.is_authenticated %}
+        <a href="/clubs/create" class="btn btn-create-club">+ Create New Club</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Search & Filter Section -->
+<div class="search-section">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control" id="clubSearch" placeholder="Search clubs by name, category, or description...">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" id="categoryFilter">
+        <option value="">All Categories</option>
+        <option value="Drama & Theater">Drama & Theater</option>
+        <option value="Sports & Fitness">Sports & Fitness</option>
+        <option value="Arts & Crafts">Arts & Crafts</option>
+        <option value="Technology">Technology</option>
+        <option value="Academic">Academic</option>
+        <option value="Community">Community</option>
+        <option value="Music">Music</option>
+        <option value="Photography">Photography</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Categories Pills -->
+<div class="categories-pills">
+  <button class="category-pill active" data-category="">All</button>
+  <button class="category-pill" data-category="Drama & Theater">🎭 Drama</button>
+  <button class="category-pill" data-category="Sports & Fitness">⚽ Sports</button>
+  <button class="category-pill" data-category="Arts & Crafts">🎨 Arts</button>
+  <button class="category-pill" data-category="Technology">💻 Tech</button>
+  <button class="category-pill" data-category="Academic">📚 Academic</button>
+  <button class="category-pill" data-category="Community">🌍 Community</button>
+  <button class="category-pill" data-category="Music">🎵 Music</button>
+</div>
+
+<!-- Clubs Grid -->
+<div class="clubs-grid-section">
+  {% if clubs %}
+    <div class="row g-4" id="clubsGrid">
+      {% for club in clubs %}
+        <div class="col-md-6 col-lg-4 club-item" data-category="{{ club.category }}" data-name="{{ club.club_name|lower }}" data-desc="{{ club.description|lower }}">
+          <div class="club-card-new">
+            <div class="club-card-header">
+              <span class="club-category">{{ club.category }}</span>
+              <span class="club-status {% if club.status == 'active' %}active{% else %}pending{% endif %}">
+                {% if club.status == 'active' %}✓ Active{% else %}⏳ Pending{% endif %}
+              </span>
+            </div>
+            <div class="club-card-body">
+              <h3 class="club-name">{{ club.club_name }}</h3>
+              <p class="club-description">{{ club.description[:120] }}{% if club.description|length > 120 %}...{% endif %}</p>
+              
+              <div class="club-meta">
+                <div class="meta-item">
+                  <span class="meta-icon">👥</span>
+                  <span>{{ club.members|length }} members</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-icon">📅</span>
+                  <span>{{ club.created_at.strftime('%b %Y') if club.created_at else 'N/A' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="club-card-footer">
+              <a href="/clubs/{{ club.id }}" class="btn btn-view-club">View Details</a>
+              {% if current_user.is_authenticated %}
+                {% set user_membership = namespace(found=false) %}
+                {% for membership in current_user.memberships %}
+                  {% if membership.club_id == club.id %}
+                    {% set user_membership.found = true %}
+                  {% endif %}
+                {% endfor %}
+                {% if user_membership.found %}
+                  <span class="member-badge">✓ Member</span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🎭</div>
+      <h3>No clubs available yet</h3>
+      <p>Be the first to create a club and start building your community!</p>
+      {% if current_user.is_authenticated %}
+        <a href="/clubs/create" class="btn btn-create-club">Create First Club</a>
+      {% else %}
+        <a href="/register" class="btn btn-create-club">Join to Create</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<!-- Stats Footer -->
+<div class="clubs-stats-footer">
+  <div class="row text-center">
+    <div class="col-4">
+      <div class="footer-stat">
+        <h3>{{ clubs|length }}</h3>
+        <p>Total Clubs</p>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="footer-stat">
+        <h3>6</h3>
+        <p>Categories</p>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="footer-stat">
+        <h3>1000+</h3>
+        <p>Total Members</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category pill filtering
+    const categoryPills = document.querySelectorAll('.category-pill');
+    const clubItems = document.querySelectorAll('.club-item');
+    const searchInput = document.getElementById('clubSearch');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    function filterClubs() {
+        const selectedCategory = document.querySelector('.category-pill.active').dataset.category;
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        clubItems.forEach(item => {
+            const itemCategory = item.dataset.category;
+            const itemName = item.dataset.name;
+            const itemDesc = item.dataset.desc;
+            
+            const matchesCategory = selectedCategory === '' || itemCategory === selectedCategory;
+            const matchesSearch = searchTerm === '' || 
+                itemName.includes(searchTerm) || 
+                itemDesc.includes(searchTerm);
+            
+            if (matchesCategory && matchesSearch) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    categoryPills.forEach(pill => {
+        pill.addEventListener('click', function() {
+            categoryPills.forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            filterClubs();
+        });
+    });
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterClubs);
+    }
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function() {
+            const selected = this.value;
+            categoryPills.forEach(p => {
+                p.classList.remove('active');
+                if (p.dataset.category === selected) {
+                    p.classList.add('active');
+                }
+            });
+            // Also trigger "All" if empty
+            if (selected === '') {
+                document.querySelector('.category-pill[data-category=""]').classList.add('active');
+            }
+            filterClubs();
+        });
+    }
+});
+</script>
+{% endblock %}
+

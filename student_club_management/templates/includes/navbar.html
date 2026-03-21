@@ -1,0 +1,534 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <!-- Logo with Animation -->
+    <a class="navbar-brand" href="/">
+      <div class="logo-container">
+        <span class="logo-icon">🎓</span>
+        <span class="logo-text">DUT<span class="text-accent">Clubs</span></span>
+      </div>
+    </a>
+    
+    <!-- Animated Hamburger -->
+    <button class="navbar-toggler" type="button" id="burger" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <!-- Home -->
+        <li class="nav-item">
+          <a class="nav-link nav-item-link" href="/">
+            <i class="nav-icon">🏠</i>
+            <span>Home</span>
+          </a>
+        </li>
+        
+        {% if current_user.is_authenticated %}
+          <!-- Dashboard Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link nav-item-link dropdown-toggle" href="#" id="dashboardDropdown" role="button" data-bs-toggle="dropdown">
+              <i class="nav-icon">📊</i>
+              <span>Dashboard</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end glass-dropdown">
+              {% if current_user.role == 'admin' %}
+                <li><a class="dropdown-item" href="/dashboard/admin">⚙️ Admin Panel</a></li>
+              {% elif current_user.role == 'leader' %}
+                <li><a class="dropdown-item" href="/dashboard/leader">👔 Leader Dashboard</a></li>
+              {% else %}
+                <li><a class="dropdown-item" href="/dashboard/user">🎒 My Dashboard</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/dashboard/profile">👤 My Profile</a></li>
+            </ul>
+          </li>
+          
+          <!-- Chat with Badge -->
+          <li class="nav-item">
+            <a class="nav-link nav-item-link position-relative" href="/chat">
+              <i class="nav-icon">💬</i>
+              <span>Chat</span>
+              {% if chat_unread_count and chat_unread_count > 0 %}
+                <span class="notification-badge">{{ chat_unread_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+          
+          <!-- Announcements with Badge -->
+          <li class="nav-item">
+            <a class="nav-link nav-item-link position-relative" href="/announcements">
+              <i class="nav-icon">📢</i>
+              <span>News</span>
+              {% if unread_announcements and unread_announcements > 0 %}
+                <span class="notification-badge">{{ unread_announcements }}</span>
+              {% endif %}
+            </a>
+          </li>
+          
+          <!-- Notifications with Badge -->
+          <li class="nav-item">
+            <a class="nav-link nav-item-link position-relative" href="/notifications">
+              <i class="nav-icon">🔔</i>
+              <span>Alerts</span>
+              {% if unread_notifications and unread_notifications > 0 %}
+                <span class="notification-badge">{{ unread_notifications }}</span>
+              {% endif %}
+            </a>
+          </li>
+          
+          <!-- User Profile Menu -->
+          <li class="nav-item dropdown">
+            <a class="nav-link profile-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+              <div class="profile-avatar">
+                {% if current_user.profile_image %}
+                  <img src="{{ url_for('static', filename='images/' + current_user.profile_image) }}" alt="{{ current_user.first_name }}">
+                {% else %}
+                  <span>{{ current_user.first_name[0] }}{{ current_user.last_name[0] }}</span>
+                {% endif %}
+              </div>
+              <span class="user-name">{{ current_user.first_name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end glass-dropdown profile-menu">
+              <li class="dropdown-header">
+                <div class="user-info">
+                  <strong>{{ current_user.first_name }} {{ current_user.last_name }}</strong>
+                  <small>{{ current_user.email }}</small>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/dashboard/profile">👤 My Profile</a></li>
+              <li><a class="dropdown-item" href="/clubs">🏢 Browse Clubs</a></li>
+              <li><a class="dropdown-item" href="/events/calendar">📅 Events</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="/logout">🚪 Logout</a></li>
+            </ul>
+          </li>
+        {% else %}
+          <!-- Login/Register for Guests -->
+          <li class="nav-item">
+            <a class="nav-link btn-login" href="/login">
+              <i class="nav-icon">🔑</i>
+              <span>Login</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link btn-register" href="/register">
+              <i class="nav-icon">✏️</i>
+              <span>Register</span>
+            </a>
+          </li>
+        {% endif %}
+        
+        <!-- Dark/Light Mode Toggle -->
+        <li class="nav-item">
+          <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+            <span class="toggle-track">
+              <span class="toggle-icon sun">☀️</span>
+              <span class="toggle-icon moon">🌙</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+/* Navbar Glassmorphism & Animations */
+.navbar {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+  /* CRITICAL: Navbar must be on top of everything */
+  z-index: 9998 !important;
+  position: relative;
+}
+
+[data-theme="dark"] .navbar {
+  background: rgba(15, 23, 42, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Logo Styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-accent {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Nav Item Links */
+.nav-item-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem !important;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-item-link:hover::before {
+  width: 80%;
+}
+
+.nav-item-link:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Profile Dropdown */
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.8rem !important;
+  border-radius: 50px;
+  background: rgba(102, 126, 234, 0.1);
+  transition: all 0.3s ease;
+}
+
+.profile-link:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: scale(1.02);
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px solid white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar span {
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.user-name {
+  font-weight: 600;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Glass Dropdown */
+.glass-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  padding: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: dropdownFade 0.2s ease;
+  /* CRITICAL: Ensure dropdowns are always on top */
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+.dropdown {
+  z-index: 9998 !important;
+  position: relative;
+}
+
+.dropdown-menu {
+  z-index: 9999 !important;
+}
+
+.dropdown-menu.show {
+  z-index: 9999 !important;
+  display: block !important;
+}
+
+[data-theme="dark"] .glass-dropdown {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  transform: translateX(5px);
+}
+
+.dropdown-header {
+  padding: 0.5rem 1rem;
+}
+
+.user-info strong {
+  display: block;
+  color: #333;
+}
+
+[data-theme="dark"] .user-info strong {
+  color: #f1f5f9;
+}
+
+.user-info small {
+  color: #64748b;
+}
+
+/* Login/Register Buttons */
+.btn-login, .btn-register {
+  padding: 0.5rem 1.2rem !important;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-login {
+  background: transparent;
+  border: 2px solid #667eea;
+  color: #667eea;
+}
+
+.btn-login:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-register {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+}
+
+.btn-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+
+.toggle-track {
+  width: 56px;
+  height: 28px;
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  transition: all 0.4s ease;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .toggle-track {
+  background: linear-gradient(135deg, #1e293b, #334155);
+}
+
+.toggle-icon {
+  font-size: 0.9rem;
+  transition: all 0.4s ease;
+  opacity: 0.4;
+}
+
+.toggle-icon.sun {
+  transform: rotate(0deg);
+}
+
+.toggle-icon.moon {
+  transform: rotate(180deg);
+}
+
+[data-theme="dark"] .toggle-icon.sun {
+  opacity: 0.4;
+  transform: rotate(-180deg);
+}
+
+[data-theme="dark"] .toggle-icon.moon {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+/* Navbar Toggler */
+.navbar-toggler {
+  border: none;
+  padding: 0.5rem;
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.toggler-icon {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #333;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .toggler-icon {
+  background: #f1f5f9;
+}
+
+.toggler-icon::before,
+.toggler-icon::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 2px;
+  background: #333;
+  transition: all 0.3s ease;
+  left: 0;
+}
+
+[data-theme="dark"] .toggler-icon::before,
+[data-theme="dark"] .toggler-icon::after {
+  background: #f1f5f9;
+}
+
+.toggler-icon::before {
+  top: -8px;
+}
+
+.toggler-icon::after {
+  top: 8px;
+}
+
+.navbar-toggler[aria-expanded="true"] .toggler-icon {
+  background: transparent;
+}
+
+.navbar-toggler[aria-expanded="true"] .toggler-icon::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.navbar-toggler[aria-expanded="true"] .toggler-icon::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    padding: 1rem;
+    border-radius: 16px;
+    margin-top: 0.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+  
+  [data-theme="dark"] .navbar-collapse {
+    background: rgba(15, 23, 42, 0.98);
+  }
+  
+  .nav-item-link {
+    padding: 0.8rem 1rem !important;
+  }
+  
+  .user-name {
+    display: none;
+  }
+}
+</style>
+

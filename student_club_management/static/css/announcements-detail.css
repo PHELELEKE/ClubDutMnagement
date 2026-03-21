@@ -1,0 +1,77 @@
+/* Announcement Detail Styles */
+.announcement-detail-content {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+.attachment-item {
+  display: block;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.attachment-item:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.reaction-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: all 0.2s;
+}
+
+.reaction-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.comment-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.announcement-title {
+  color: #fff !important;
+}
+
+.announcement-meta {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+.announcement-section-title {
+  color: #fff !important;
+}
+
+.announcement-hr {
+  border-color: rgba(255,255,255,0.2);
+}
+
+.btn-announcement {
+  color: #fff !important;
+}
+
+.btn-announcement-edit {
+  background: rgba(102,126,234,0.3) !important;
+}
+
+.btn-announcement-delete {
+  background: rgba(239,68,68,0.3) !important;
+}
+
+.btn-comment-post {
+  background: rgba(102,126,234,0.8) !important;
+}

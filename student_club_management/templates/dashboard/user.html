@@ -1,0 +1,587 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard - DUT Club Management{% endblock %}
+{% block content %}
+<div class="user-dashboard">
+
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="welcome-heading">Welcome back, {{ current_user.first_name }}! 👋</h1>
+      <p class="welcome-text">Here's your club activity overview</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      <a href="/clubs/" class="btn btn-browse-clubs">
+        <span class="btn-icon">📚</span> Browse Clubs
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-icon-box stat-clubs">🎭</div>
+    <div class="stat-content">
+      <span class="stat-value">{{ clubs_count }}</span>
+      <span class="stat-label">Clubs Joined</span>
+    </div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-icon-box stat-events">📅</div>
+    <div class="stat-content">
+      <span class="stat-value">{{ upcoming_events|length }}</span>
+      <span class="stat-label">Upcoming Events</span>
+    </div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-icon-box stat-achievements">🏆</div>
+    <div class="stat-content">
+      <span class="stat-value">0</span>
+      <span class="stat-label">Achievements</span>
+    </div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-icon-box stat-points">⭐</div>
+    <div class="stat-content">
+      <span class="stat-value">0</span>
+      <span class="stat-label">Points</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="dashboard-sections">
+  
+  <!-- My Clubs Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="section-icon">🎭</span> My Clubs
+      </h2>
+      <span class="section-count">{{ clubs_count }} clubs</span>
+    </div>
+    <div class="section-body">
+      {% if memberships %}
+        <div class="items-grid">
+          {% for membership in memberships[:6] %}
+            <div class="item-card">
+              <div class="item-icon">🎭</div>
+              <div class="item-info">
+                <h3>{{ membership.club.club_name }}</h3>
+                <p>{{ membership.club.category }}</p>
+              </div>
+              <div class="item-meta">
+                <span class="item-role">{{ membership.role }}</span>
+                <span class="item-members">{{ membership.club.members|length }} members</span>
+              </div>
+              <a href="/clubs/{{ membership.club.id }}" class="btn btn-details">View Details</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-message">
+          <span class="empty-icon">🎭</span>
+          <h4>No clubs yet</h4>
+          <p>You haven't joined any clubs. Start exploring!</p>
+          <a href="/clubs/" class="btn btn-primary">Find Clubs</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Upcoming Events Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="section-icon">📅</span> Upcoming Events
+      </h2>
+      <span class="section-count">{{ upcoming_events|length }} events</span>
+    </div>
+    <div class="section-body">
+      {% if upcoming_events %}
+        <div class="items-grid">
+          {% for event in upcoming_events[:6] %}
+            <div class="item-card event-card">
+              <div class="event-date-box">
+                <span class="event-day">{{ event.event_date.strftime('%d') if event.event_date else '--' }}</span>
+                <span class="event-month">{{ event.event_date.strftime('%b') if event.event_date else '--' }}</span>
+              </div>
+              <div class="item-info">
+                <h3>{{ event.event_name }}</h3>
+                <p>📍 {{ event.location }}</p>
+              </div>
+              <div class="item-meta">
+                <span class="event-type {% if event.requires_club %}type-club{% else %}type-open{% endif %}">
+                  {% if event.requires_club %}Club Event{% else %}Open Event{% endif %}
+                </span>
+                <span class="item-members">
+                  {% if event.max_attendees %}
+                    {{ event.attendees|length }}/{{ event.max_attendees }} spots
+                  {% else %}
+                    {{ event.attendees|length }} attending
+                  {% endif %}
+                </span>
+              </div>
+              <a href="/events/{{ event.id }}" class="btn btn-details">View Event</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-message">
+          <span class="empty-icon">📅</span>
+          <h4>No upcoming events</h4>
+          <p>Join clubs to see their events here</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions-section">
+  <h2 class="section-title-main">⚡ Quick Actions</h2>
+  <div class="actions-row">
+    <a href="/clubs/" class="action-tile">
+      <span class="action-emoji">🔍</span>
+      <span class="action-text">Discover Clubs</span>
+      <span class="action-desc">Find new clubs to join</span>
+    </a>
+    <a href="/events/calendar" class="action-tile">
+      <span class="action-emoji">📆</span>
+      <span class="action-text">Event Calendar</span>
+      <span class="action-desc">View all upcoming events</span>
+    </a>
+    <a href="/dashboard/profile" class="action-tile">
+      <span class="action-emoji">👤</span>
+      <span class="action-text">My Profile</span>
+      <span class="action-desc">View & edit your info</span>
+    </a>
+    <a href="/clubs/manage" class="action-tile">
+      <span class="action-emoji">⚙️</span>
+      <span class="action-text">My Memberships</span>
+      <span class="action-desc">Manage your clubs</span>
+    </a>
+  </div>
+</div>
+
+</div>
+
+<style>
+/* User Dashboard - Distinct Style */
+.user-dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 40px rgba(102,126,234,0.3);
+}
+
+.welcome-heading {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.welcome-text {
+  color: rgba(255,255,255,0.85);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.btn-browse-clubs {
+  background: #fff;
+  color: #667eea;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-browse-clubs:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  color: #667eea;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-box {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.15);
+}
+
+.stat-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-clubs { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.stat-events { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.stat-achievements { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+.stat-points { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Section Cards */
+.dashboard-sections {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.section-card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  background: rgba(255,255,255,0.05);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.section-title {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-icon {
+  font-size: 1.4rem;
+}
+
+.section-count {
+  background: rgba(102,126,234,0.3);
+  color: #fff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.section-body {
+  padding: 1.25rem;
+}
+
+/* Items Grid */
+.items-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.item-card:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.item-icon {
+  font-size: 1.8rem;
+}
+
+.event-date-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 50px;
+}
+
+.event-day {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.event-month {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h3 {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.item-info p {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.item-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.item-role {
+  background: rgba(16,185,129,0.2);
+  color: #10b981;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.event-type {
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.type-club {
+  background: rgba(245,158,11,0.2);
+  color: #f59e0b;
+}
+
+.type-open {
+  background: rgba(16,185,129,0.2);
+  color: #10b981;
+}
+
+.item-members {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.75rem;
+}
+
+.btn-details {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-details:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+  color: #fff;
+}
+
+/* Empty State */
+.empty-message {
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty-message .empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.empty-message h4 {
+  color: #fff;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-message p {
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 1rem 0;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Quick Actions */
+.quick-actions-section {
+  margin-bottom: 2rem;
+}
+
+.section-title-main {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.actions-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.action-tile {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.action-tile:hover {
+  background: rgba(255,255,255,0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.action-emoji {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.action-text {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.action-desc {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.8rem;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-sections {
+    grid-template-columns: 1fr;
+  }
+  
+  .actions-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 575px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .actions-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .item-card {
+    flex-wrap: wrap;
+  }
+  
+  .btn-details {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+}
+</style>
+{% endblock %}
+

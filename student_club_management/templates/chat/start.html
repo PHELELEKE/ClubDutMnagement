@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}Start Conversation - DUT Club Management{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="glass-card">
+                <div class="mb-4">
+                    <a href="/chat" class="btn btn-sm mb-2" style="background: rgba(255,255,255,0.2); color: #fff;">← Back to Messages</a>
+                    <h2 style="color: #fff;">Start New Conversation</h2>
+                </div>
+                
+                <form method="POST" action="/chat/start">
+                    <div class="mb-3">
+                        <label style="color: #fff;">Search Recipient</label>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="userSearch" class="form-control" placeholder="Search by name or email..." 
+                                   style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                            <div id="searchResults" class="search-results" style="display: none;"></div>
+                        </div>
+                        <input type="hidden" name="recipient_id" id="recipient_id" required>
+                        <div id="selectedUser" class="selected-user" style="display: none;">
+                            <span style="color: #fff;"></span>
+                            <button type="button" class="btn-remove" onclick="clearSelection()">×</button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label style="color: #fff;">Subject (Optional)</label>
+                        <input type="text" name="subject" class="form-control" placeholder="What is this about?" 
+                               style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label style="color: #fff;">Message</label>
+                        <textarea name="message" class="form-control" rows="4" placeholder="Type your message..." 
+                                  style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="background: rgba(102,126,234,0.8); color: #fff;">
+                        Start Conversation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.search-input-wrapper { position: relative; }
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(30, 30, 60, 0.95);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 4px;
+}
+.search-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.2s;
+}
+.search-result-item:hover {
+    background: rgba(102, 126, 234, 0.3);
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-name {
+    color: #fff;
+    font-weight: 500;
+    display: block;
+}
+.search-result-email {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+}
+.search-result-role {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 8px;
+}
+.search-result-role.admin { background: rgba(239, 68, 68, 0.3); color: #ef4444; }
+.search-result-role.leader { background: rgba(245, 158, 11, 0.3); color: #f59e0b; }
+.search-result-role.student { background: rgba(34, 197, 94, 0.3); color: #22c55e; }
+
+.selected-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.5);
+    border-radius: 8px;
+    margin-top: 10px;
+}
+.selected-user span { color: #fff; }
+.btn-remove {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 4px;
+}
+.btn-remove:hover { color: #fff; }
+
+.form-select:focus, .form-control:focus {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(102,126,234,0.5);
+    color: #fff;
+    box-shadow: none;
+}
+
+.form-select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.no-results {
+    padding: 16px;
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+}
+</style>
+
+<script>
+let searchTimeout = null;
+const searchInput = document.getElementById('userSearch');
+const searchResults = document.getElementById('searchResults');
+const recipientInput = document.getElementById('recipient_id');
+const selectedUserDiv = document.getElementById('selectedUser');
+
+searchInput.addEventListener('input', function() {
+    const query = this.value.trim();
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        searchResults.style.display = 'none';
+        return;
+    }
+    
+    searchTimeout = setTimeout(function() {
+        fetch('/chat/api/search-users?q=' + encodeURIComponent(query))
+            .then(function(response) { return response.json(); })
+            .then(function(users) {
+                if (users.length === 0) {
+                    searchResults.innerHTML = '<div class="no-results">No users found</div>';
+                } else {
+                    searchResults.innerHTML = users.map(function(user) {
+                        return '<div class="search-result-item" onclick="selectUser(' + user.id + ', \'' + escapeHtml(user.name) + '\')">' +
+                            '<span class="search-result-name">' + escapeHtml(user.name) + 
+                            '<span class="search-result-role ' + user.role + '">' + user.role + '</span></span>' +
+                            '<span class="search-result-email">' + escapeHtml(user.email) + '</span>' +
+                        '</div>';
+                    }).join('');
+                }
+                searchResults.style.display = 'block';
+            });
+    }, 300);
+});
+
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.style.display = 'none';
+    }
+});
+
+function selectUser(id, name) {
+    recipientInput.value = id;
+    selectedUserDiv.querySelector('span').textContent = name;
+    selectedUserDiv.style.display = 'flex';
+    searchInput.value = '';
+    searchResults.style.display = 'none';
+}
+
+function clearSelection() {
+    recipientInput.value = '';
+    selectedUserDiv.style.display = 'none';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}
+

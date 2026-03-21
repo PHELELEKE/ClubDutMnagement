@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}System Settings - Admin{% endblock %}
+{% block content %}
+<div class="glass-card mb-4">
+  <h2>System Settings ⚙️</h2>
+  <p class="lead">Configure application settings</p>
+</div>
+
+<!-- General Settings -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="glass-card h-100">
+      <h5>📊 Application Statistics</h5>
+      <ul class="list-unstyled">
+        <li class="mb-2">
+          <strong>Total Users:</strong> 
+          <span class="badge bg-info">{{ users_count | default(0) }}</span>
+        </li>
+        <li class="mb-2">
+          <strong>Total Clubs:</strong> 
+          <span class="badge bg-success">{{ clubs_count | default(0) }}</span>
+        </li>
+        <li class="mb-2">
+          <strong>Total Events:</strong> 
+          <span class="badge bg-primary">{{ events_count | default(0) }}</span>
+        </li>
+        <li class="mb-0">
+          <strong>Active Members:</strong> 
+          <span class="badge bg-warning">{{ active_members | default(0) }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="col-lg-6">
+    <div class="glass-card h-100">
+      <h5>🔧 Moderation Tools</h5>
+      <div class="d-grid gap-2">
+        <a href="/admin/users" class="btn btn-outline-info">Manage Users</a>
+        <a href="/admin/clubs" class="btn btn-outline-warning">Manage Clubs</a>
+        <a href="/admin/events" class="btn btn-outline-primary">Manage Events</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Feature Settings -->
+<div class="glass-card mb-4">
+  <h5 class="mb-4">✨ Feature Settings</h5>
+  
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="form-check form-switch p-3" style="background: rgba(255,255,255,0.05); border-radius: 8px;">
+        <input class="form-check-input" type="checkbox" id="enableGamification" checked>
+        <label class="form-check-label fw-bold" for="enableGamification">
+          🎮 Enable Gamification
+          <p class="small text-muted mb-0">Allow achievements and points system</p>
+        </label>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-check form-switch p-3" style="background: rgba(255,255,255,0.05); border-radius: 8px;">
+        <input class="form-check-input" type="checkbox" id="enableNotifications" checked>
+        <label class="form-check-label fw-bold" for="enableNotifications">
+          🔔 Enable Notifications
+          <p class="small text-muted mb-0">Send event and club update notifications</p>
+        </label>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-check form-switch p-3" style="background: rgba(255,255,255,0.05); border-radius: 8px;">
+        <input class="form-check-input" type="checkbox" id="enableRegistration" checked>
+        <label class="form-check-label fw-bold" for="enableRegistration">
+          📝 Enable User Registration
+          <p class="small text-muted mb-0">Allow new students to register accounts</p>
+        </label>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="form-check form-switch p-3" style="background: rgba(255,255,255,0.05); border-radius: 8px;">
+        <input class="form-check-input" type="checkbox" id="enableEmailVerification">
+        <label class="form-check-label fw-bold" for="enableEmailVerification">
+          ✉️ Enable Email Verification
+          <p class="small text-muted mb-0">Require email verification on signup</p>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="glass-card">
+  <h5 class="mb-3">🛠️ Maintenance</h5>
+  <div class="row g-2">
+    <div class="col-sm-6">
+      <button class="btn btn-warning w-100">🗑️ Clear Cache</button>
+    </div>
+    <div class="col-sm-6">
+      <button class="btn btn-danger w-100">📊 Export Database</button>
+    </div>
+    <div class="col-sm-6">
+      <button class="btn btn-info w-100">📋 View Logs</button>
+    </div>
+    <div class="col-sm-6">
+      <button class="btn btn-secondary w-100">⚙️ System Health Check</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Store settings in localStorage (demo only)
+  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      localStorage.setItem(this.id, this.checked);
+      console.log(this.id + ' set to ' + this.checked);
+    });
+  });
+</script>
+{% endblock %}
