@@ -344,16 +344,17 @@ def dashboard():
         return redirect('/login')
     
     if not db_initialized:
-        return render_template_string(BASE_TEMPLATE.replace('{% block title %}Club Management System{% endblock %}', 'Dashboard') + """
+        dashboard_error_template = BASE_TEMPLATE.replace('{% block title %}Club Management System{% endblock %}', 'Dashboard') + """
         {% block content %}
         <div class="card">
             <h2>🔧 Database Not Available</h2>
             <p>The database is not currently available. Please check your configuration.</p>
-            <p><strong>DATABASE_URL:</strong> {{ database_url_status }}</p>
-            <p><strong>Database Status:</strong> {{ db_status }}</p>
+            <p><strong>DATABASE_URL:</strong> """ + ('Set' if database_url else 'Not Set') + """</p>
+            <p><strong>Database Status:</strong> """ + ('Connected' if db_initialized else 'Not Connected') + """</p>
         </div>
         {% endblock %}
-        """, database_url_status='Set' if database_url else 'Not Set', db_status='Connected' if db_initialized else 'Not Connected')
+        """
+        return render_template_string(dashboard_error_template)
     
     # Get statistics
     try:
@@ -379,16 +380,18 @@ def dashboard():
                                recent_clubs=recent_clubs,
                                upcoming_events=upcoming_events)
     except Exception as e:
-        return render_template_string(BASE_TEMPLATE.replace('{% block title %}Club Management System{% endblock %}', 'Dashboard Error') + f"""
+        error_message = str(e)
+        dashboard_error_template = BASE_TEMPLATE.replace('{% block title %}Club Management System{% endblock %}', 'Dashboard Error') + """
         {% block content %}
         <div class="card">
             <h2>❌ Database Error</h2>
             <p>There was an error accessing the database:</p>
-            <p><code>{str(e)}</code></p>
+            <p><code>""" + error_message + """</code></p>
             <p>Please check your database configuration and try again.</p>
         </div>
         {% endblock %}
-        """)
+        """
+        return render_template_string(dashboard_error_template)
 
 @app.route('/logout')
 def logout():
