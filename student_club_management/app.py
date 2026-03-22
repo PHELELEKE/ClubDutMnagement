@@ -5,7 +5,6 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from student_club_management.config import config
 import os
 
 # Initialize extensions
@@ -20,8 +19,25 @@ def create_app(config_name='development'):
     """Application factory pattern"""
     app = Flask(__name__)
     
-    # Load configuration
-    app.config.from_object(config[config_name])
+    # Configuration
+    if config_name == 'development':
+        app.config['SECRET_KEY'] = 'dev-secret-key-change-in-production'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clubmanagement.db'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+        app.config['MAIL_PORT'] = 587
+        app.config['MAIL_USE_TLS'] = True
+        app.config['MAIL_USERNAME'] = 'your-email@gmail.com'
+        app.config['MAIL_PASSWORD'] = 'your-app-password'
+    else:  # production
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///clubmanagement_prod.db'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+        app.config['MAIL_PORT'] = 587
+        app.config['MAIL_USE_TLS'] = True
+        app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+        app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
     
     # Initialize extensions
     db.init_app(app)
