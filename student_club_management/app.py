@@ -85,6 +85,11 @@ def create_app(config_name='development'):
     # Register blueprints after app context is set up
     register_blueprints()
     
+    # Create database tables first
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created")
+    
     # Create admin user automatically if not exists
     with app.app_context():
         from models.user import User
