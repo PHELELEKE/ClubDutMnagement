@@ -6,8 +6,6 @@ Flask-Mail==0.9.1
 Flask-WTF==1.2.1
 Flask-Caching==2.1.0
 python-dotenv==1.0.0
-# pyodbc==5.0.1  # Removed - SQL Server driver not available on Linux/Render
-Flask-SQLAlchemy==3.1.1
 requests==2.32.5
 WTForms==3.1.1
 email-validator==2.1.1
@@ -20,5 +18,7 @@ Jinja2==3.1.2
 click==8.1.7
 itsdangerous==2.1.2
 werkzeug==3.0.0
-cryptography==41.0.7
+cryptography==43.0.1
 gunicorn==22.0.0
+SQLAlchemy>=2.0.20,<3.0
+psycopg2-binary==2.9.9

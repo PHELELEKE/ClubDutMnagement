@@ -1,0 +1,15 @@
+# Railway Environment Variables Template
+# Copy to .env and fill values. Do NOT commit .env!
+
+# Generate secure key: python -c "import secrets; print(secrets.token_hex(24))"
+SECRET_KEY=your-super-secret-key-here
+
+# Auto-set by Railway Postgres plugin (recommended)
+# DATABASE_URL=postgresql://...
+
+# Optional Email (Gmail App Password)
+MAIL_USERNAME=your@gmail.com
+MAIL_PASSWORD=your-app-password
+
+# Disable for prod emails
+MAIL_SUPPRESS_SEND=false
