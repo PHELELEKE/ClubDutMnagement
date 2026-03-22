@@ -14,8 +14,8 @@ npm install -g @railway/cli
 
 ### **3. Prepare Your Repository**
 ```bash
-git add Dockerfile railway.toml .github/workflows/
-git commit -m "Add Railway deployment configuration"
+git add Dockerfile railway.toml .github README_RAILWAY.md RAILWAY_DEPLOYMENT_GUIDE.md .env.production .gitignore
+git commit -m "Ready for Railway deployment - PHELELEKE/ClubDutMnagement"
 git push origin main
 ```
 

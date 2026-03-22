@@ -1,5 +1,5 @@
 # GitHub Actions Workflow for Railway Deployment
-name: Deploy ClubDutMnagement to Railway
+name: Deploy PHELELEKE/ClubDutMnagement to Railway
 
 on:
   push:

@@ -33,7 +33,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build
-build/
 dist/
 *.egg-info/
 
@@ -44,4 +43,3 @@ railway.toml.backup
 
 # Deployment
 railway.toml
-uploads/

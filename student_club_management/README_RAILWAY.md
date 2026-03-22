@@ -30,8 +30,8 @@ This repository contains the complete ClubDutMnagement system optimized for Rail
 
 2. **Setup Repository**
    ```bash
-   git add Dockerfile railway.toml .github/workflows/
-   git commit -m "Add Railway deployment configuration"
+   git add Dockerfile railway.toml .github README_RAILWAY.md RAILWAY_DEPLOYMENT_GUIDE.md .env.production .gitignore
+   git commit -m "Ready for Railway deployment - PHELELEKE/ClubDutMnagement"
    git push origin main
    ```
 
@@ -41,6 +41,24 @@ This repository contains the complete ClubDutMnagement system optimized for Rail
    railway init
    railway up
    ```
+
+### 📋 **Next Steps:**
+
+1. **Push to GitHub:**
+   ```bash
+   git add Dockerfile railway.toml .github README_RAILWAY.md RAILWAY_DEPLOYMENT_GUIDE.md .env.production .gitignore
+   git commit -m "Ready for Railway deployment - PHELELEKE/ClubDutMnagement"
+   git push origin main
+   ```
+
+2. **Create Railway Account & Deploy:**
+   - Go to [railway.app](https://railway.app)
+   - Sign up with your GitHub account (`PHELELEKE`)
+   - Get your Railway API token
+   - Deploy your repository
+
+### 🌐 **Repository Name:**
+You'll need to create the repository as **`PHELELEKE/ClubDutMnagement`** to match your GitHub username.
 
 ### 🔧 **Environment Variables**
 
