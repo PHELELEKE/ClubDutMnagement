@@ -343,28 +343,52 @@ def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
     
+    if not db_initialized:
+        return render_template_string(BASE_TEMPLATE.replace('{% block title %}Club Management System{% endblock %}', 'Dashboard') + """
+        {% block content %}
+        <div class="card">
+            <h2>🔧 Database Not Available</h2>
+            <p>The database is not currently available. Please check your configuration.</p>
+            <p><strong>DATABASE_URL:</strong> {{ database_url_status }}</p>
+            <p><strong>Database Status:</strong> {{ db_status }}</p>
+        </div>
+        {% endblock %}
+        """, database_url_status='Set' if database_url else 'Not Set', db_status='Connected' if db_initialized else 'Not Connected')
+    
     # Get statistics
-    total_users = User.query.count()
-    total_clubs = Club.query.filter_by(is_active=True).count()
-    total_events = Event.query.filter(Event.event_date >= date.today()).count()
-    total_attendances = EventAttendance.query.count()
-    
-    # Get recent data
-    recent_clubs = db.session.query(
-        Club, db.func.count(ClubMember.id).label('member_count')
-    ).join(ClubMember).group_by(Club.id).order_by(Club.created_at.desc()).limit(5).all()
-    
-    upcoming_events = Event.query.filter(
-        Event.event_date >= date.today()
-    ).order_by(Event.event_date).limit(5).all()
-    
-    return render_template_string(DASHBOARD_TEMPLATE,
-                           total_users=total_users,
-                           total_clubs=total_clubs,
-                           total_events=total_events,
-                           total_attendances=total_attendances,
-                           recent_clubs=recent_clubs,
-                           upcoming_events=upcoming_events)
+    try:
+        total_users = User.query.count()
+        total_clubs = Club.query.filter_by(is_active=True).count()
+        total_events = Event.query.filter(Event.event_date >= date.today()).count()
+        total_attendances = EventAttendance.query.count()
+        
+        # Get recent data
+        recent_clubs = db.session.query(
+            Club, db.func.count(ClubMember.id).label('member_count')
+        ).join(ClubMember).group_by(Club.id).order_by(Club.created_at.desc()).limit(5).all()
+        
+        upcoming_events = Event.query.filter(
+            Event.event_date >= date.today()
+        ).order_by(Event.event_date).limit(5).all()
+        
+        return render_template_string(DASHBOARD_TEMPLATE,
+                               total_users=total_users,
+                               total_clubs=total_clubs,
+                               total_events=total_events,
+                               total_attendances=total_attendances,
+                               recent_clubs=recent_clubs,
+                               upcoming_events=upcoming_events)
+    except Exception as e:
+        return render_template_string(BASE_TEMPLATE.replace('{% block title %}Club Management System{% endblock %}', 'Dashboard Error') + f"""
+        {% block content %}
+        <div class="card">
+            <h2>❌ Database Error</h2>
+            <p>There was an error accessing the database:</p>
+            <p><code>{str(e)}</code></p>
+            <p>Please check your database configuration and try again.</p>
+        </div>
+        {% endblock %}
+        """)
 
 @app.route('/logout')
 def logout():
@@ -393,13 +417,45 @@ def health():
             'database': 'not connected'
         }), 500
 
-# Initialize database on first run
-with app.app_context():
+# Initialize database on first run - with error handling
+def initialize_database():
     try:
-        db.create_all()
-        init_database()
+        with app.app_context():
+            # Test database connection first
+            if database_url:
+                db.engine.execute('SELECT 1')
+                print("Database connection successful")
+                
+                # Create tables
+                db.create_all()
+                print("Database tables created")
+                
+                # Create default admin user if not exists
+                if not User.query.filter_by(username='admin').first():
+                    admin = User(
+                        username='admin',
+                        email='admin@clubmanagement.com',
+                        first_name='System',
+                        last_name='Administrator',
+                        role='admin'
+                    )
+                    admin.set_password('admin123')
+                    db.session.add(admin)
+                    db.session.commit()
+                    print("Admin user created")
+                
+                return True
+            else:
+                print("No DATABASE_URL configured")
+                return False
     except Exception as e:
-        print(f"Database init error: {e}")
+        print(f"Database initialization error: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+# Initialize database
+db_initialized = initialize_database()
 
 if __name__ == "__main__":
     app.run(debug=True)
