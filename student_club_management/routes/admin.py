@@ -22,12 +22,30 @@ def admin_required(func):
 @admin_required
 def admin_index():
     try:
-        # redirect into dashboard admin view which already collects statistics
-        return redirect('/dashboard/admin')
+        # Get basic statistics for admin panel
+        from models.user import User
+        from models.club import Club
+        from models.event import Event
+        from models.membership import Membership
+        
+        total_users = User.query.count()
+        total_clubs = Club.query.count()
+        total_events = Event.query.count()
+        active_members = Membership.query.filter_by(status='active').count()
+        
+        return render_template('admin/index.html', 
+                             total_users=total_users,
+                             total_clubs=total_clubs,
+                             total_events=total_events,
+                             active_members=active_members)
     except Exception as e:
         print(f"❌ Admin index error: {e}")
-        # If dashboard fails, render basic admin panel
-        return render_template('admin/index.html')
+        # If queries fail, render basic admin panel with default values
+        return render_template('admin/index.html', 
+                             total_users=0,
+                             total_clubs=0,
+                             total_events=0,
+                             active_members=0)
 
 @admin_bp.route('/users')
 @admin_required

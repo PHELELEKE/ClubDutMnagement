@@ -9,9 +9,14 @@ clubs_bp = Blueprint('clubs', __name__, url_prefix='/clubs')
 
 @clubs_bp.route('/')
 def list_clubs():
-    # Show all active clubs
-    clubs = Club.query.filter_by(status='active').all()
-    return render_template('clubs/list.html', clubs=clubs)
+    try:
+        # Show all active clubs
+        clubs = Club.query.filter_by(status='active').all()
+        return render_template('clubs/list.html', clubs=clubs)
+    except Exception as e:
+        print(f"❌ Clubs list error: {e}")
+        # Return empty clubs list if query fails
+        return render_template('clubs/list.html', clubs=[])
 
 # join club endpoint
 def ensure_member(user_id, club_id):
@@ -63,24 +68,29 @@ def detail(club_id):
 @clubs_bp.route('/create', methods=['GET','POST'])
 @login_required
 def create():
-    from forms import ClubForm
-    form = ClubForm()
-    if form.validate_on_submit():
-        new_club = Club(
-            club_name=form.club_name.data,
-            description=form.description.data,
-            category=form.category.data,
-            max_members=form.max_members.data,
-            meeting_schedule=form.meeting_schedule.data,
-            created_by=current_user.id,
-            status='pending'
-        )
-        from flask import current_app
-        current_app.extensions['sqlalchemy'].db.session.add(new_club)
-        current_app.extensions['sqlalchemy'].db.session.commit()
-        flash('Club created successfully!', 'success')
-        return redirect(f'/clubs/{new_club.id}')
-    return render_template('clubs/create.html', form=form)
+    try:
+        from forms import ClubForm
+        form = ClubForm()
+        if form.validate_on_submit():
+            new_club = Club(
+                club_name=form.club_name.data,
+                description=form.description.data,
+                category=form.category.data,
+                max_members=form.max_members.data,
+                meeting_schedule=form.meeting_schedule.data,
+                created_by=current_user.id,
+                status='pending'
+            )
+            from flask import current_app
+            current_app.extensions['sqlalchemy'].db.session.add(new_club)
+            current_app.extensions['sqlalchemy'].db.session.commit()
+            flash('Club created successfully! It is now pending approval.', 'success')
+            return redirect(f'/clubs/{new_club.id}')
+        return render_template('clubs/create.html', form=form)
+    except Exception as e:
+        print(f"❌ Club creation error: {e}")
+        flash('Error creating club. Please try again.', 'danger')
+        return redirect('/clubs')
 
 @clubs_bp.route('/<int:club_id>/edit', methods=['GET','POST'])
 @login_required
