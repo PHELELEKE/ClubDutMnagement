@@ -104,9 +104,9 @@ def create_app(config_name='development'):
                     last_name='System',
                     role='admin',
                     is_active=True,
-                    email_verified=True
+                    email_verified=True,
+                    password_hash=bcrypt.generate_password_hash('admin@123').decode('utf-8')
                 )
-                admin_user.set_password('admin@123')
                 db.session.add(admin_user)
                 db.session.commit()
                 print("✅ Admin user created: admin@dut.ac.za / admin@123")
