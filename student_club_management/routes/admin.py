@@ -21,8 +21,13 @@ def admin_required(func):
 @admin_bp.route('/')
 @admin_required
 def admin_index():
-    # redirect into dashboard admin view which already collects statistics
-    return redirect('/dashboard/admin')
+    try:
+        # redirect into dashboard admin view which already collects statistics
+        return redirect('/dashboard/admin')
+    except Exception as e:
+        print(f"❌ Admin index error: {e}")
+        # If dashboard fails, render basic admin panel
+        return render_template('admin/index.html')
 
 @admin_bp.route('/users')
 @admin_required

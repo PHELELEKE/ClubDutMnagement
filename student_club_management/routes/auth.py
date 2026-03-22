@@ -35,7 +35,7 @@ def login():
                 return redirect(next_page)
             # direct to appropriate dashboard based on role
             if user.role == 'admin':
-                return redirect('/dashboard/admin')
+                return redirect('/admin/')
             elif user.role == 'leader':
                 return redirect('/dashboard/leader')
             else:
