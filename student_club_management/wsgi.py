@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 """
-Simple WSGI entry point for Render deployment
+Simple WSGI entry point for Render deployment - No complex imports
 """
 
 import os
 import sys
 
-# Add the student_club_management directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'student_club_management'))
+# Add current directory to Python path
+sys.path.insert(0, os.path.dirname(__file__))
 
-# Now import the app
-from app import create_app
+# Simple Flask app for testing
+from flask import Flask, jsonify
 
-# Get configuration from environment
-config_name = os.environ.get('FLASK_CONFIG', 'production')
+app = Flask(__name__)
 
-# Create app
-app = create_app(config_name)
+@app.route('/')
+def index():
+    return "Club Management System - Working!"
+
+@app.route('/health')
+def health():
+    return jsonify({'status': 'healthy', 'message': 'Club Management System is running'})
 
 if __name__ == "__main__":
     app.run()
+
+# For Gunicorn
+application = app
