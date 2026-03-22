@@ -3,7 +3,7 @@
 WSGI entry point for production deployment
 """
 
-from app import create_app
+from student_club_management.app import create_app
 import os
 
 # Get configuration from environment
