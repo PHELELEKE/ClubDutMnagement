@@ -1,0 +1,44 @@
+# GitHub Actions Workflow for Railway Deployment
+name: Deploy ClubDutMnagement to Railway
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - '.git*'
+      - 'Dockerfile'
+      - 'railway.toml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install Railway CLI
+        run: |
+          npm install -g @railway/cli
+          
+      - name: Login to Railway
+        run: |
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          
+      - name: Deploy to Railway
+        run: |
+          railway up
+          
+      - name: Connect custom domain (optional)
+        run: |
+          echo "To connect custom domain, run: railway domain connect your-domain.com"
+        if: false
+        
+      - name: Deployment complete
+        run: |
+          echo "🎉 Deployment complete!"
+          echo "App URL: https://clubdutmnagement.railway.app"
+          echo "Health check: https://clubdutmnagement.railway.app/health"
