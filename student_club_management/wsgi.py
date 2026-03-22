@@ -15,17 +15,41 @@ import os
 
 app = Flask(__name__)
 
-# Database configuration
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Database configuration with fallbacks
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+else:
+    # Fallback for testing without database
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize database
-db = SQLAlchemy(app)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+
+# Initialize database only if DATABASE_URL is set
+if database_url:
+    db = SQLAlchemy(app)
+else:
+    db = None
 
 # Test database connection
 @app.route('/')
 def index():
+    if not database_url:
+        return """
+        <h1>🎉 Club Management System</h1>
+        <h2>📊 Database Status: Not configured</h2>
+        <h3>🔧 Environment Variables:</h3>
+        <ul>
+            <li>DATABASE_URL: ❌ Missing (Please add in Render dashboard)</li>
+            <li>SECRET_KEY: {'✅ Set' if os.environ.get('SECRET_KEY') else '❌ Missing'}</li>
+            <li>FLASK_ENV: {os.environ.get('FLASK_ENV', 'Not set')}</li>
+        </ul>
+        <h3>🚀 Next Steps:</h3>
+        <p>Add DATABASE_URL environment variable in Render dashboard to connect to PostgreSQL!</p>
+        """
+    
     try:
         # Test database connection
         db.engine.execute('SELECT 1')
@@ -50,6 +74,13 @@ def index():
 
 @app.route('/health')
 def health():
+    if not database_url:
+        return jsonify({
+            'status': 'unhealthy', 
+            'message': 'DATABASE_URL environment variable not set',
+            'database': 'not configured'
+        }), 500
+    
     try:
         # Test database connection
         db.engine.execute('SELECT 1')
@@ -70,7 +101,7 @@ def api_test():
     """Test API endpoint"""
     return jsonify({
         'message': 'API is working',
-        'database_url': os.environ.get('DATABASE_URL', 'Not set'),
+        'database_url': 'Set' if os.environ.get('DATABASE_URL') else 'Not set',
         'flask_env': os.environ.get('FLASK_ENV', 'Not set')
     })
 
