@@ -85,32 +85,38 @@ def create_app(config_name='development'):
     # Register blueprints after app context is set up
     register_blueprints()
     
-    # Create database tables first
+    # Create database tables and admin user with proper error handling
     with app.app_context():
-        db.create_all()
-        print("✅ Database tables created")
-    
-    # Create admin user automatically if not exists
-    with app.app_context():
-        from models.user import User
-        admin = User.query.filter_by(email='admin@dut.ac.za').first()
-        if not admin:
-            print("Creating default admin user...")
-            admin_user = User(
-                student_number='ADMIN001',
-                email='admin@dut.ac.za',
-                first_name='Administrator',
-                last_name='System',
-                role='admin',
-                is_active=True,
-                email_verified=True
-            )
-            admin_user.set_password('admin@123')
-            db.session.add(admin_user)
-            db.session.commit()
-            print("✅ Admin user created: admin@dut.ac.za / admin@123")
-        else:
-            print("✅ Admin user already exists")
+        try:
+            # Create all tables
+            db.create_all()
+            print("✅ Database tables created successfully")
+            
+            # Create admin user automatically if not exists
+            from models.user import User
+            admin = User.query.filter_by(email='admin@dut.ac.za').first()
+            if not admin:
+                print("Creating default admin user...")
+                admin_user = User(
+                    student_number='ADMIN001',
+                    email='admin@dut.ac.za',
+                    first_name='Administrator',
+                    last_name='System',
+                    role='admin',
+                    is_active=True,
+                    email_verified=True
+                )
+                admin_user.set_password('admin@123')
+                db.session.add(admin_user)
+                db.session.commit()
+                print("✅ Admin user created: admin@dut.ac.za / admin@123")
+            else:
+                print("✅ Admin user already exists")
+                
+        except Exception as e:
+            print(f"❌ Database initialization error: {e}")
+            print("⚠️  Continuing without database initialization...")
+            # Don't crash the app if database fails
     
     # Main route
     @app.route('/')
