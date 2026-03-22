@@ -31,7 +31,11 @@ def create_app(config_name='development'):
         app.config['MAIL_PASSWORD'] = 'your-app-password'
     else:  # production
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///clubmanagement_prod.db'
+        database_url = os.environ.get('DATABASE_URL') or 'sqlite:///clubmanagement_prod.db'
+        # Use pg8000 driver for Python 3.14 compatibility
+        if database_url and database_url.startswith('postgresql://'):
+            database_url = database_url.replace('postgresql://', 'postgresql+pg8000://')
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['MAIL_SERVER'] = 'smtp.gmail.com'
         app.config['MAIL_PORT'] = 587
