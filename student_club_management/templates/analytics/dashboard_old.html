@@ -1,0 +1,909 @@
+{% extends 'base.html' %}
+{% block title %}Analytics Dashboard - DUT Club Management{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Modern Analytics Dashboard Styles */
+.analytics-dashboard {
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  min-height: 100vh;
+  color: white;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated background particles */
+.analytics-dashboard::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+  animation: float 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -30px) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) rotate(240deg); }
+}
+
+/* Header Section */
+.analytics-header {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  padding: 2.5rem;
+  margin-bottom: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.analytics-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.analytics-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #fff, #f0f0f0, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.analytics-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 300;
+  position: relative;
+  z-index: 2;
+}
+
+/* Action Buttons - Removed to prevent errors */
+
+/* Stats Cards */
+.stats-grid {
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 10;
+}
+
+.stat-card-analytics {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.stat-card-analytics::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.stat-card-analytics::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.stat-card-analytics:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15),
+              0 10px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.stat-icon-analytics {
+  font-size: 3rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.stat-info-analytics {
+  position: relative;
+  z-index: 2;
+}
+
+.stat-number-analytics {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  line-height: 1.2;
+}
+
+.stat-label-analytics {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0.6rem 0 0 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-change {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin: 0;
+  font-weight: 400;
+}
+
+.stat-bg-analytics {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  font-size: 5rem;
+  opacity: 0.08;
+  z-index: 1;
+  transform: rotate(-15deg);
+}
+
+/* Chart Cards */
+.chart-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 10;
+}
+
+.chart-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.chart-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15),
+              0 10px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.chart-header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  padding: 1.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.chart-header::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.chart-header h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chart-body {
+  padding: 2rem;
+  position: relative;
+}
+
+/* Activity Stats */
+.activity-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.stat-item:hover::before {
+  left: 100%;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(8px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.stat-item-icon {
+  font-size: 1.8rem;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.stat-item-text {
+  flex: 1;
+  font-weight: 600;
+  color: white;
+  font-size: 0.95rem;
+}
+
+/* Club Status Cards */
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.status-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.status-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+.status-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-5px) scale(1.05);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.status-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.status-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin: 0.8rem 0 0 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+/* Event Attendance Cards */
+.event-attendance-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.event-attendance-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+.event-attendance-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-5px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.event-attendance-card h5 {
+  color: white;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.event-date {
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1.2rem;
+  font-weight: 400;
+}
+
+.attendance-summary {
+  background: rgba(102, 126, 234, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 0.8rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.attendance-count {
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.attendees-list h6 {
+  color: white;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.attendee-item {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.attendee-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.attendee-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.attendee-email {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  flex: 1;
+}
+
+.checkin-time {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+}
+
+.more-attendees {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.no-attendees {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 1.5rem;
+  font-style: italic;
+}
+
+/* Chart Styling */
+canvas {
+  max-height: 300px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px;
+}
+
+/* Section Separators */
+.section-separator {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  margin: 3rem 0;
+  border-radius: 2px;
+  position: relative;
+}
+
+.section-separator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .analytics-dashboard {
+    padding: 1rem 0;
+  }
+  
+  .analytics-header {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .analytics-title {
+    font-size: 2.2rem;
+  }
+  
+  .btn-refresh, .btn-reminders {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+  }
+  
+  .stat-number-analytics {
+    font-size: 2.2rem;
+  }
+  
+  .chart-header {
+    text-align: center;
+    padding: 1.5rem;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .attendee-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .attendee-email {
+    font-size: 0.75rem;
+  }
+  
+  .checkin-time {
+    font-size: 0.75rem;
+  }
+  
+  .chart-body {
+    padding: 1.5rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard">
+
+<!-- Header -->
+<div class="analytics-header">
+  <div class="row align-items-center">
+    <div class="col-12">
+      <h1 class="analytics-title">📊 Analytics Dashboard</h1>
+      <p class="analytics-subtitle">Real-time insights into club activities and engagement</p>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="stats-grid">
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">👥</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.users }}</h3>
+          <p class="stat-label-analytics">Total Users</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_users }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">👥</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">🏛️</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.clubs }}</h3>
+          <p class="stat-label-analytics">Total Clubs</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_clubs }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">🏛️</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">📅</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.events }}</h3>
+          <p class="stat-label-analytics">Total Events</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_events }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">📅</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">🤝</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.memberships }}</h3>
+          <p class="stat-label-analytics">Total Memberships</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_memberships }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">🤝</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section Separator -->
+<div class="section-separator"></div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>📈 Membership Growth (30 days)</h4>
+      </div>
+      <div class="chart-body">
+        <canvas id="membershipChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>🎯 Event Attendance (30 days)</h4>
+      </div>
+      <div class="chart-body">
+        <canvas id="attendanceChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>📊 Participation Trends (30 days)</h4>
+      </div>
+      <div class="chart-body">
+        <canvas id="participationChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section Separator -->
+<div class="section-separator"></div>
+
+<!-- Status and Activity -->
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>🏛️ Club Status</h4>
+      </div>
+      <div class="chart-body">
+        <div class="status-grid">
+          <div class="status-item">
+            <h3 class="status-number">{{ summary.club_status.active }}</h3>
+            <p class="status-label">Active Clubs</p>
+          </div>
+          <div class="status-item">
+            <h3 class="status-number">{{ summary.club_status.pending }}</h3>
+            <p class="status-label">Pending Clubs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>📈 Recent Activity</h4>
+      </div>
+      <div class="chart-body">
+        <div class="activity-stats">
+          <div class="stat-item">
+            <div class="stat-item-icon">🎉</div>
+            <div class="stat-item-text">{{ summary.recent_activity.recent_attendance }} attendances this month</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-icon">📅</div>
+            <div class="stat-item-text">{{ summary.recent_activity.upcoming_events }} upcoming events</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-icon">📧</div>
+            <div class="stat-item-text">Automated reminders sent daily</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-icon">📊</div>
+            <div class="stat-item-text">Analytics updated in real-time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section Separator -->
+<div class="section-separator"></div>
+
+<!-- Event Attendance Details -->
+<div class="row g-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>👥 Recent Event Attendance</h4>
+      </div>
+      <div class="chart-body">
+        {% if summary.recent_events_attendance %}
+          <div class="row">
+            {% for event_data in summary.recent_events_attendance %}
+              <div class="col-md-6 mb-4">
+                <div class="event-attendance-card">
+                  <h5>{{ event_data.event.event_name }}</h5>
+                  <p class="event-date">
+                    <small>{{ event_data.event.event_date.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                  </p>
+                  <div class="attendance-summary">
+                    <span class="attendance-count">{{ event_data.attendance_count }} attendees</span>
+                  </div>
+                  {% if event_data.attendees %}
+                    <div class="attendees-list">
+                      <h6>Attendees:</h6>
+                      {% for attendee in event_data.attendees[:5] %}
+                        <div class="attendee-item">
+                          <span class="attendee-name">{{ attendee.name }}</span>
+                          <span class="attendee-email">{{ attendee.email }}</span>
+                          <span class="checkin-time">{{ attendee.checked_in_at.strftime('%I:%M %p') }}</span>
+                        </div>
+                      {% endfor %}
+                      {% if event_data.attendees|length > 5 %}
+                        <div class="more-attendees">
+                          <small>... and {{ event_data.attendees|length - 5 }} more</small>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <p class="no-attendees"><small>No attendees recorded</small></p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-center">No recent events found</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Chart configuration
+const chartConfig = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            labels: {
+                color: 'rgba(255,255,255,0.8)',
+                font: {
+                    size: 14,
+                    weight: '600'
+                }
+            }
+        },
+        tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: 'rgba(255,255,255,0.2)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 12
+        }
+    },
+    scales: {
+        x: {
+            ticks: { 
+                color: 'rgba(255,255,255,0.7)',
+                font: {
+                    size: 12
+                }
+            },
+            grid: { 
+                color: 'rgba(255,255,255,0.1)',
+                drawBorder: false
+            }
+        },
+        y: {
+            ticks: { 
+                color: 'rgba(255,255,255,0.7)',
+                font: {
+                    size: 12
+                }
+            },
+            grid: { 
+                color: 'rgba(255,255,255,0.1)',
+                drawBorder: false
+            }
+        }
+    }
+};
+
+// Membership Growth Chart
+const membershipCtx = document.getElementById('membershipChart').getContext('2d');
+new Chart(membershipCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for record in membership_growth %}'{{ record.metric_date.strftime('%m/%d') }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'New Memberships',
+            data: [{% for record in membership_growth %}{{ record.metric_value }}{% if not loop.last %},{% endif %}{% endfor %}],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102,126,234,0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: chartConfig
+});
+
+// Event Attendance Chart
+const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+new Chart(attendanceCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for record in event_attendance %}'{{ record.metric_date.strftime('%m/%d') }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Event Attendance',
+            data: [{% for record in event_attendance %}{{ record.metric_value }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: 'rgba(16,185,129,0.8)',
+            borderColor: '#10b981',
+            borderWidth: 2,
+            borderRadius: 8,
+            hoverBackgroundColor: 'rgba(16,185,129,1)'
+        }]
+    },
+    options: chartConfig
+});
+
+// Participation Trends Chart
+const participationCtx = document.getElementById('participationChart').getContext('2d');
+new Chart(participationCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for record in participation_trends %}'{{ record.metric_date.strftime('%m/%d') }}'{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Overall Participation',
+            data: [{% for record in participation_trends %}{{ record.metric_value }}{% if not loop.last %},{% endif %}{% endfor %}],
+            borderColor: '#764ba2',
+            backgroundColor: 'rgba(118,75,162,0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#764ba2',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+        }]
+    },
+    options: chartConfig
+});
+
+</script>
+
+{% endblock %}
