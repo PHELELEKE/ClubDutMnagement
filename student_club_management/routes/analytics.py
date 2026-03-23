@@ -29,9 +29,23 @@ def analytics_dashboard():
         summary = AnalyticsService.get_dashboard_summary()
         
         # Get trend data
-        membership_growth = AnalyticsService.get_analytics_data('membership_growth', 30)
-        event_attendance = AnalyticsService.get_analytics_data('event_attendance', 30)
-        participation_trends = AnalyticsService.get_analytics_data('participation', 30)
+        analytics_data = AnalyticsService.get_analytics_data('membership_growth', 30)
+        membership_growth = {
+            'labels': [record.metric_date.strftime('%Y-%m-%d') for record in analytics_data],
+            'data': [record.metric_value for record in analytics_data]
+        }
+        
+        analytics_data = AnalyticsService.get_analytics_data('event_attendance', 30)
+        event_attendance = {
+            'labels': [record.metric_date.strftime('%Y-%m-%d') for record in analytics_data],
+            'data': [record.metric_value for record in analytics_data]
+        }
+        
+        analytics_data = AnalyticsService.get_analytics_data('participation', 30)
+        participation_trends = {
+            'labels': [record.metric_date.strftime('%Y-%m-%d') for record in analytics_data],
+            'data': [record.metric_value for record in analytics_data]
+        }
         
         return render_template('analytics/dashboard.html',
                              summary=summary,
