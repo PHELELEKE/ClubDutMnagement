@@ -286,56 +286,86 @@ def detail(announcement_id):
 @login_required
 def edit(announcement_id):
     """Edit an announcement"""
-    announcement = Announcement.query.get_or_404(announcement_id)
-    club = Club.query.get(announcement.club_id)
-    
-    if current_user.role == 'student':
-        flash('You do not have permission to edit announcements', 'danger')
-        return redirect('/announcements')
-    
-    if current_user.role == 'leader' and announcement.created_by != current_user.id:
-        flash('You can only edit your own announcements', 'danger')
-        return redirect('/announcements')
-    
-    if request.method == 'POST':
-        announcement.title = request.form.get('title')
-        announcement.content = request.form.get('content')
-        announcement.priority = request.form.get('priority', 'normal')
-        announcement.pinned = request.form.get('pinned') == 'on'
+    try:
+        print(f"🔍 Announcement edit: Starting edit of announcement {announcement_id}")
         
-        resource_links = request.form.get('resource_links', '')
-        if resource_links:
+        announcement = Announcement.query.get_or_404(announcement_id)
+        club = Club.query.get(announcement.club_id)
+        
+        print(f"🔍 Announcement edit: Found announcement: {announcement.title}")
+        print(f"🔍 Announcement edit: User role: {current_user.role}")
+        
+        if current_user.role == 'student':
+            print("🔍 Announcement edit: Student user - denying edit")
+            flash('You do not have permission to edit announcements', 'danger')
+            return redirect('/announcements')
+        
+        if current_user.role == 'leader' and announcement.created_by != current_user.id:
+            print(f"🔍 Announcement edit: Leader trying to edit other's announcement (created_by: {announcement.created_by}, current_user: {current_user.id})")
+            flash('You can only edit your own announcements', 'danger')
+            return redirect('/announcements')
+        
+        print("🔍 Announcement edit: Permission granted - proceeding with edit")
+        
+        if request.method == 'POST':
+            print("🔍 Announcement edit: Processing POST request")
+            
+            announcement.title = request.form.get('title')
+            announcement.content = request.form.get('content')
+            announcement.priority = request.form.get('priority', 'normal')
+            announcement.pinned = request.form.get('pinned') == 'on'
+            
+            resource_links = request.form.get('resource_links', '')
+            if resource_links:
+                try:
+                    links = [l.strip() for l in resource_links.split('\n') if l.strip()]
+                    announcement.resource_links = json.dumps(links)
+                    print(f"🔍 Announcement edit: Updated resource links: {links}")
+                except Exception as e:
+                    print(f"⚠️ Announcement edit: Error parsing resource links: {e}")
+                    pass
+            
+            if 'attachment' in request.files:
+                file = request.files['attachment']
+                if file.filename:
+                    filename = secure_filename(file.filename)
+                    upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'announcements')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    filepath = os.path.join(upload_folder, f"{datetime.now().timestamp()}_{filename}")
+                    file.save(filepath)
+                    announcement.attachment_url = f"static/uploads/announcements/{os.path.basename(filepath)}"
+                    announcement.attachment_name = file.filename
+                    print(f"🔍 Announcement edit: New attachment saved: {announcement.attachment_url}")
+            
+            print("🔍 Announcement edit: Committing changes to database...")
+            db.session.commit()
+            print("✅ Announcement edit: Successfully updated and committed")
+            
+            flash('Announcement updated successfully!', 'success')
+            return redirect(f'/announcements/{announcement.id}')
+        
+        # GET request - show edit form
+        resource_links_list = []
+        if announcement.resource_links:
             try:
-                links = [l.strip() for l in resource_links.split('\n') if l.strip()]
-                announcement.resource_links = json.dumps(links)
-            except:
-                pass
+                resource_links_list = json.loads(announcement.resource_links)
+                print(f"🔍 Announcement edit: Parsed {len(resource_links_list)} resource links for form")
+            except Exception as e:
+                print(f"⚠️ Announcement edit: Error parsing resource links for form: {e}")
+                resource_links_list = []
         
-        if 'attachment' in request.files:
-            file = request.files['attachment']
-            if file.filename:
-                filename = secure_filename(file.filename)
-                upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'announcements')
-                os.makedirs(upload_folder, exist_ok=True)
-                filepath = os.path.join(upload_folder, f"{datetime.now().timestamp()}_{filename}")
-                file.save(filepath)
-                announcement.attachment_url = f"static/uploads/announcements/{os.path.basename(filepath)}"
-                announcement.attachment_name = file.filename
+        print("✅ Announcement edit: Rendering edit template")
+        return render_template('announcements/edit.html', 
+                             announcement=announcement,
+                             resource_links=resource_links_list)
         
-        db.session.commit()
-        flash('Announcement updated successfully!', 'success')
-        return redirect(f'/announcements/{announcement.id}')
-    
-    resource_links_list = []
-    if announcement.resource_links:
-        try:
-            resource_links_list = json.loads(announcement.resource_links)
-        except:
-            pass
-    
-    return render_template('announcements/edit.html', 
-                         announcement=announcement,
-                         resource_links=resource_links_list)
+    except Exception as e:
+        print(f"❌ Announcement edit error: {e}")
+        print(f"❌ Error type: {type(e)}")
+        import traceback
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error editing announcement. Please try again.', 'danger')
+        return redirect('/announcements')
 
 @announcements_bp.route('/<int:announcement_id>/delete', methods=['POST'])
 @login_required
