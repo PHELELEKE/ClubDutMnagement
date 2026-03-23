@@ -135,22 +135,34 @@ def create():
 def edit(club_id):
     club = Club.query.get_or_404(club_id)
     
-    # Only club creator can edit
-    if club.created_by != current_user.id:
-        return 'Unauthorized', 403
+    # Check if user can edit this club
+    if current_user.role != 'admin' and club.created_by != current_user.id:
+        flash('You do not have permission to edit this club.', 'danger')
+        return redirect(f'/clubs/{club_id}')
     
-    from forms import ClubEditForm
-    form = ClubEditForm(obj=club)
-    if form.validate_on_submit():
-        club.club_name = form.club_name.data
-        club.description = form.description.data
-        club.category = form.category.data
-        club.max_members = form.max_members.data
-        club.meeting_schedule = form.meeting_schedule.data
-        from flask import current_app
-        current_app.extensions['sqlalchemy'].db.session.commit()
-        flash('Club updated successfully.', 'success')
-        return redirect(f'/clubs/{club.id}')
+    if request.method == 'POST':
+        from forms import ClubForm
+        form = ClubForm(obj=club)
+        
+        if form.validate_on_submit():
+            club.club_name = form.club_name.data
+            club.description = form.description.data
+            club.category = form.category.data
+            club.max_members = form.max_members.data
+            club.meeting_schedule = form.meeting_schedule.data
+            
+            try:
+                print(f"🔍 Club edit: Updating club {club_id}")
+                db.session.commit()
+                print("🔍 Club edit: Successfully updated and committed")
+                flash('Club updated successfully.', 'success')
+                return redirect(f'/clubs/{club.id}')
+            except Exception as e:
+                print(f"❌ Club edit error: {e}")
+                print(f"❌ Full traceback: {traceback.format_exc()}")
+                flash('Error updating club. Please try again.', 'danger')
+                return redirect(f'/clubs/{club_id}')
+    
     return render_template('clubs/edit.html', club=club, form=form)
 
 @clubs_bp.route('/<int:club_id>/manage')
@@ -166,7 +178,6 @@ def manage(club_id):
 @clubs_bp.route('/<int:club_id>/delete', methods=['POST'])
 @login_required
 def delete_club(club_id):
-    from flask import current_app
     from models.notification import Notification
     
     club = Club.query.get_or_404(club_id)
@@ -177,7 +188,15 @@ def delete_club(club_id):
     
     # Leaders can only request deletion - admin must approve
     club.status = 'pending_deletion'
-    current_app.extensions['sqlalchemy'].db.session.commit()
+    try:
+        print(f"🔍 Club delete: Requesting deletion of club {club_id}")
+        db.session.commit()
+        print("🔍 Club delete: Successfully marked for deletion")
+    except Exception as e:
+        print(f"❌ Club delete error: {e}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error requesting club deletion. Please try again.', 'danger')
+        return redirect(f'/clubs/{club_id}')
     
     # Notify admin about deletion request
     try:
@@ -192,6 +211,7 @@ def delete_club(club_id):
 @login_required
 def kick_member(club_id, user_id):
     from models.membership import Membership
+    
     club = Club.query.get_or_404(club_id)
     
     # Only club creator can kick members
@@ -199,11 +219,18 @@ def kick_member(club_id, user_id):
         return 'Unauthorized', 403
     
     member = Membership.query.filter_by(user_id=user_id, club_id=club_id).first_or_404()
-    from flask import current_app
-    current_app.extensions['sqlalchemy'].db.session.delete(member)
-    current_app.extensions['sqlalchemy'].db.session.commit()
-    flash('Member removed from club.', 'success')
-    return redirect(f'/clubs/{club_id}/manage')
+    try:
+        print(f"🔍 Kick member: Removing user {user_id} from club {club_id}")
+        db.session.delete(member)
+        db.session.commit()
+        print("🔍 Kick member: Successfully removed and committed")
+        flash('Member removed from club.', 'success')
+        return redirect(f'/clubs/{club_id}/manage')
+    except Exception as e:
+        print(f"❌ Kick member error: {e}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error removing member. Please try again.', 'danger')
+        return redirect(f'/clubs/{club_id}/manage')
 
 # View all user memberships
 @clubs_bp.route('/manage')
@@ -233,19 +260,26 @@ def leave_club(club_id):
         flash('Club leader cannot leave their own club. Transfer leadership first.', 'warning')
         return redirect(f'/clubs/{club_id}')
     
-    user = User.query.get(current_user.id)
-    current_app.extensions['sqlalchemy'].db.session.delete(membership)
-    current_app.extensions['sqlalchemy'].db.session.commit()
+    try:
+        print(f"🔍 Leave club: Removing user {current_user.id} from club {club_id}")
+        db.session.delete(membership)
+        db.session.commit()
+        print("🔍 Leave club: Successfully removed and committed")
+    except Exception as e:
+        print(f"❌ Leave club error: {e}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error leaving club. Please try again.', 'danger')
+        return redirect(f'/clubs/{club_id}')
     
     # Notify student
     try:
-        Notification.notify_student_left_club(user, club)
+        Notification.notify_student_left_club(current_user, club)
     except:
         pass
     
     # Notify leader
     try:
-        Notification.notify_leader_student_left(club, user)
+        Notification.notify_leader_student_left(club, current_user)
     except:
         pass
     
@@ -413,8 +447,16 @@ def move_member(club_id, user_id):
     
     # Create new membership in target club
     new_membership = Membership(user_id=user_id, club_id=target_club_id)
-    current_app.extensions['sqlalchemy'].db.session.add(new_membership)
-    current_app.extensions['sqlalchemy'].db.session.commit()
+    try:
+        print(f"🔍 Move member: Creating membership for user {user_id} in club {target_club_id}")
+        db.session.add(new_membership)
+        db.session.commit()
+        print("🔍 Move member: Successfully created and committed")
+    except Exception as e:
+        print(f"❌ Move member error: {e}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error moving member. Please try again.', 'danger')
+        return redirect(f'/clubs/{club_id}/manage')
     
     # Notify student about the move
     try:
@@ -445,9 +487,16 @@ def approve_leave(club_id, user_id):
         flash('Member not found.', 'warning')
         return redirect(f'/clubs/{club_id}/manage')
     
-    user = User.query.get(user_id)
-    current_app.extensions['sqlalchemy'].db.session.delete(membership)
-    current_app.extensions['sqlalchemy'].db.session.commit()
+    try:
+        print(f"🔍 Approve leave: Removing membership for user {user_id} from club {club_id}")
+        db.session.delete(membership)
+        db.session.commit()
+        print("🔍 Approve leave: Successfully removed and committed")
+    except Exception as e:
+        print(f"❌ Approve leave error: {e}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error processing leave request. Please try again.', 'danger')
+        return redirect(f'/clubs/{club_id}/manage')
     
     # Notify student
     try:

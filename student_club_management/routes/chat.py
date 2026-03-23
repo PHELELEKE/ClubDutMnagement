@@ -12,6 +12,7 @@ chat_bp = Blueprint('chat', __name__, url_prefix='/chat')
 
 # Get CSRF instance from app
 def get_csrf():
+    from flask_wtf.csrf import CSRFProtect
     from flask import current_app
     return current_app.extensions['csrf']
 
