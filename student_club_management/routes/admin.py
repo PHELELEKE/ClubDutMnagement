@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, flash, request, current_app
 from flask_login import login_required, current_user
+from datetime import datetime
 from models.user import User, PreRegisteredStudent
 from models.club import Club
 from models.event import Event

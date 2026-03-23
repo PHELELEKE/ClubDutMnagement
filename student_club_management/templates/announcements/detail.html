@@ -42,15 +42,15 @@
                 {% if announcement.resource_links %}
                 <div class="announcement-links">
                     <h5 style="color: #fff;">Resource Links</h5>
-                    {% for link in announcement.resource_links %}
-                    {% if link %}
-                    <div class="link-item mb-2">
-                        <a href="{{ link }}" class="attachment-item" target="_blank" style="display: block; padding: 10px; background: rgba(102,126,234,0.2); border-radius: 8px; color: #fff; text-decoration: none; margin-bottom: 5px;">
-                            <span>🔗 {{ link }}</span>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for link in announcement.resource_links %}
+                        {% if link %}
+                        <a href="{{ link }}" class="attachment-item" target="_blank" style="display: inline-block; padding: 8px 16px; background: rgba(102,126,234,0.2); border-radius: 20px; color: #fff; text-decoration: none; border: 1px solid rgba(102,126,234,0.3);">
+                            <span>🔗 {{ link|truncate(30) }}</span>
                         </a>
+                        {% endif %}
+                        {% endfor %}
                     </div>
-                    {% endif %}
-                    {% endfor %}
                 </div>
                 {% endif %}
                 
@@ -64,91 +64,14 @@
                 </div>
                 {% endif %}
                 
-                <hr style="border-color: rgba(255,255,255,0.2);">
-                
-                <div class="reactions-section">
-                    <div class="reaction-buttons">
-                        <button class="reaction-btn" data-reaction="like">Like</button>
-                        <button class="reaction-btn" data-reaction="love">Love</button>
-                        <button class="reaction-btn" data-reaction="celebrate">Celebrate</button>
-                    </div>
-                    <div id="reactionsSummary"></div>
-                </div>
-                
-                <hr style="border-color: rgba(255,255,255,0.2);">
-                
-                <div class="comments-section">
-                    <h4 style="color: #fff;">Comments</h4>
-                    <div class="add-comment">
-                        <textarea id="commentInput" class="form-control" rows="2" placeholder="Write a comment..."></textarea>
-                        <button class="btn mt-2" id="submitComment" style="background: rgba(102,126,234,0.8); color: #fff;">Post</button>
-                    </div>
-                    <div class="comments-list mt-4" id="commentsList"></div>
+                <div class="announcement-footer mt-4">
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.9em;">
+                        Posted on {{ announcement.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-
-
-<script>
-var announcementId = {{ announcement.id }};
-var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-function loadReactions() {
-    // Mark as read when loading detail
-    fetch('/announcements/api/' + announcementId + '/mark-read', {
-        method: 'POST',
-        headers: {'X-CSRFToken': csrfToken},
-        credentials: 'same-origin'
-    }).catch(console.error);
-    
-    fetch('/announcements/api/' + announcementId + '/reactions')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            var s = document.getElementById('reactionsSummary');
-            if (data.total > 0) {
-                s.innerHTML = '<span>' + data.total + ' reactions</span>';
-            } else {
-                s.innerHTML = '<span style="color:rgba(255,255,255,0.5)">No reactions yet</span>';
-            }
-        });
-}
-
-document.querySelectorAll('.reaction-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        fetch('/announcements/api/' + announcementId + '/react', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({reaction_type: this.dataset.reaction})
-        }).then(function() { loadReactions(); })
-        .catch(function(error) { console.error('Reaction failed:', error); });
-    });
-});
-
-document.getElementById('submitComment').addEventListener('click', function() {
-    var content = document.getElementById('commentInput').value.trim();
-    if (!content) return;
-    fetch('/announcements/api/' + announcementId + '/comment', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({content: content})
-    }).then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) location.reload();
-    });
-});
-
-loadReactions();
-</script>
 {% endblock %}
 
