@@ -85,6 +85,11 @@ def create_app(config_name='development'):
     # Register blueprints after app context is set up
     register_blueprints()
     
+    # Initialize analytics scheduler
+    from services.analytics_scheduler import analytics_scheduler
+    analytics_scheduler.init_app(app)
+    print("✅ Analytics scheduler initialized")
+    
     # Create database tables and admin user with proper error handling
     with app.app_context():
         try:

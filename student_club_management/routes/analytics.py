@@ -60,6 +60,56 @@ def send_reminders():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@analytics_bp.route('/api/event-attendance/<int:event_id>')
+@login_required
+def get_event_attendance(event_id):
+    """Get detailed attendance for a specific event"""
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        from models.event import Event
+        from models.attendance import EventAttendance
+        from models.user import User
+        
+        event = Event.query.get_or_404(event_id)
+        
+        # Get attendance details
+        attendees = db.session.query(
+            User.first_name,
+            User.last_name,
+            User.email,
+            User.student_number,
+            EventAttendance.checked_in_at,
+            EventAttendance.is_attended
+        ).join(EventAttendance, User.id == EventAttendance.user_id).filter(
+            EventAttendance.event_id == event_id
+        ).all()
+        
+        attendance_data = {
+            'event': {
+                'id': event.id,
+                'name': event.event_name,
+                'date': event.event_date.strftime('%Y-%m-%d %H:%M'),
+                'location': event.location
+            },
+            'attendees': [
+                {
+                    'name': f"{att.first_name} {att.last_name}",
+                    'email': att.email,
+                    'student_number': att.student_number,
+                    'checked_in_at': att.checked_in_at.strftime('%Y-%m-%d %H:%M') if att.checked_in_at else None,
+                    'is_attended': att.is_attended
+                } for att in attendees
+            ],
+            'total_attendees': len([att for att in attendees if att.is_attended]),
+            'total_registered': len(attendees)
+        }
+        
+        return jsonify({'success': True, 'data': attendance_data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @analytics_bp.route('/api/data/<metric_type>')
 @login_required
 def get_analytics_data(metric_type):

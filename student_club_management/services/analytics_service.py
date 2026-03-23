@@ -187,6 +187,49 @@ class AnalyticsService:
         active_clubs = Club.query.filter_by(status='active').count()
         pending_clubs = Club.query.filter_by(status='pending').count()
         
+        # Upcoming events (next 7 days)
+        upcoming_events = Event.query.filter(
+            Event.event_date >= datetime.utcnow(),
+            Event.event_date <= datetime.utcnow() + timedelta(days=7),
+            Event.status == 'approved'
+        ).count()
+        
+        # Recent event attendance with details
+        recent_events_with_attendance = []
+        recent_events = Event.query.filter(
+            Event.event_date >= thirty_days_ago,
+            Event.status == 'approved'
+        ).order_by(Event.event_date.desc()).limit(10).all()
+        
+        for event in recent_events:
+            attendance_count = EventAttendance.query.filter_by(
+                event_id=event.id,
+                is_attended=True
+            ).count()
+            
+            # Get attendee details for admin view
+            attendees = db.session.query(
+                User.first_name,
+                User.last_name,
+                User.email,
+                EventAttendance.checked_in_at
+            ).join(EventAttendance, User.id == EventAttendance.user_id).filter(
+                EventAttendance.event_id == event.id,
+                EventAttendance.is_attended == True
+            ).all()
+            
+            recent_events_with_attendance.append({
+                'event': event,
+                'attendance_count': attendance_count,
+                'attendees': [
+                    {
+                        'name': f"{att.first_name} {att.last_name}",
+                        'email': att.email,
+                        'checked_in_at': att.checked_in_at
+                    } for att in attendees
+                ]
+            })
+        
         return {
             'total_counts': {
                 'users': total_users,
@@ -199,28 +242,29 @@ class AnalyticsService:
                 'new_clubs': new_clubs,
                 'new_events': new_events,
                 'new_memberships': new_memberships,
-                'recent_attendance': recent_attendance
+                'recent_attendance': recent_attendance,
+                'upcoming_events': upcoming_events
             },
             'club_status': {
                 'active': active_clubs,
                 'pending': pending_clubs
-            }
+            },
+            'recent_events_attendance': recent_events_with_attendance
         }
 
 class ReminderService:
     
     @staticmethod
     def send_event_reminders():
-        """Send automatic event reminders"""
+        """Send automatic event reminders (1 day and 5 hours before)"""
         from datetime import datetime, timedelta
         from models.notification import Notification
         
         now = datetime.utcnow()
         
-        # Get events happening in 1 day, 1 hour, and 1 week
+        # Get events happening in 1 day and 5 hours
         one_day_later = now + timedelta(days=1)
-        one_hour_later = now + timedelta(hours=1)
-        one_week_later = now + timedelta(days=7)
+        five_hours_later = now + timedelta(hours=5)
         
         # 1 day reminders
         events_1day = Event.query.filter(
@@ -245,7 +289,7 @@ class ReminderService:
                         attendance.user_id,
                         event,
                         '1_day',
-                        f"Reminder: {event.event_name} is tomorrow!"
+                        f"🗓️ Reminder: {event.event_name} is tomorrow at {event.event_date.strftime('%I:%M %p')}!"
                     )
                     
                     # Track reminder
@@ -256,21 +300,21 @@ class ReminderService:
                     )
                     db.session.add(reminder)
         
-        # 1 hour reminders
-        events_1hour = Event.query.filter(
+        # 5 hours reminders
+        events_5hours = Event.query.filter(
             Event.event_date >= now,
-            Event.event_date <= one_hour_later,
+            Event.event_date <= five_hours_later,
             Event.status == 'approved'
         ).all()
         
-        for event in events_1hour:
+        for event in events_5hours:
             attendees = EventAttendance.query.filter_by(event_id=event.id).all()
             for attendance in attendees:
                 # Check if reminder already sent
                 existing = EventReminder.query.filter_by(
                     event_id=event.id,
                     user_id=attendance.user_id,
-                    reminder_type='1_hour'
+                    reminder_type='5_hours'
                 ).first()
                 
                 if not existing:
@@ -278,15 +322,15 @@ class ReminderService:
                     Notification.create_event_reminder(
                         attendance.user_id,
                         event,
-                        '1_hour',
-                        f"URGENT: {event.event_name} starts in 1 hour!"
+                        '5_hours',
+                        f"⏰ URGENT: {event.event_name} starts in 5 hours at {event.event_date.strftime('%I:%M %p')}!"
                     )
                     
                     # Track reminder
                     reminder = EventReminder(
                         event_id=event.id,
                         user_id=attendance.user_id,
-                        reminder_type='1_hour'
+                        reminder_type='5_hours'
                     )
                     db.session.add(reminder)
         

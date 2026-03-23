@@ -1,122 +1,590 @@
 {% extends 'base.html' %}
 {% block title %}Analytics Dashboard - DUT Club Management{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Modern Analytics Dashboard Styles */
+.analytics-dashboard {
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: white;
+}
+
+/* Header Section */
+.analytics-header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #fff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.analytics-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Action Buttons */
+.btn-refresh, .btn-reminders {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.btn-refresh:hover, .btn-reminders:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  color: white;
+  text-decoration: none;
+}
+
+/* Stats Cards */
+.stats-grid {
+  margin-bottom: 2rem;
+}
+
+.stat-card-analytics {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
+  text-align: center;
+}
+
+.stat-card-analytics:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.stat-icon-analytics {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.stat-info-analytics {
+  position: relative;
+  z-index: 2;
+}
+
+.stat-number-analytics {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.stat-label-analytics {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0.5rem 0 0 0;
+}
+
+.stat-change {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.stat-bg-analytics {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-size: 4rem;
+  opacity: 0.1;
+  z-index: 1;
+}
+
+/* Chart Cards */
+.chart-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.chart-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chart-header h4 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: white;
+}
+
+.chart-body {
+  padding: 1.5rem;
+}
+
+/* Activity Stats */
+.activity-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.stat-item-icon {
+  font-size: 1.5rem;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-item-text {
+  flex: 1;
+  font-weight: 600;
+  color: white;
+}
+
+/* Club Status Cards */
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.status-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.status-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.status-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.status-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Chart Styling */
+canvas {
+  max-height: 300px;
+  border-radius: 10px;
+}
+
+/* Event Attendance Cards */
+.event-attendance-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.event-attendance-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.event-attendance-card h5 {
+  color: white;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.event-date {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+}
+
+.attendance-summary {
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.attendance-count {
+  color: white;
+  font-weight: 600;
+}
+
+.attendees-list h6 {
+  color: white;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.attendee-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.attendee-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.attendee-email {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  flex: 1;
+}
+
+.checkin-time {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+}
+
+.more-attendees {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.no-attendees {
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .analytics-dashboard {
+    padding: 1rem 0;
+  }
+  
+  .analytics-header {
+    padding: 1.5rem;
+  }
+  
+  .analytics-title {
+    font-size: 2rem;
+  }
+  
+  .btn-refresh, .btn-reminders {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .stat-number-analytics {
+    font-size: 2rem;
+  }
+  
+  .chart-header {
+    text-align: center;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .attendee-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .attendee-email {
+    font-size: 0.7rem;
+  }
+  
+  .checkin-time {
+    font-size: 0.7rem;
+  }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 style="color: white;">📊 Analytics Dashboard</h2>
-                <div>
-                    <button class="btn btn-sm me-2" onclick="refreshAnalytics()" style="background: rgba(102,126,234,0.8); color: white;">
-                        🔄 Refresh Data
-                    </button>
-                    <button class="btn btn-sm" onclick="sendReminders()" style="background: rgba(34,197,94,0.8); color: white;">
-                        📧 Send Reminders
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="analytics-dashboard">
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="glass-card text-center">
-                <h3 style="color: #667eea;">👥 Total Users</h3>
-                <h1 style="color: white;">{{ summary.total_counts.users }}</h1>
-                <small style="color: rgba(255,255,255,0.7);">+{{ summary.recent_activity.new_users }} this month</small>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="glass-card text-center">
-                <h3 style="color: #764ba2;">🏛️ Total Clubs</h3>
-                <h1 style="color: white;">{{ summary.total_counts.clubs }}</h1>
-                <small style="color: rgba(255,255,255,0.7);">+{{ summary.recent_activity.new_clubs }} this month</small>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="glass-card text-center">
-                <h3 style="color: #10b981;">📅 Total Events</h3>
-                <h1 style="color: white;">{{ summary.total_counts.events }}</h1>
-                <small style="color: rgba(255,255,255,0.7);">+{{ summary.recent_activity.new_events }} this month</small>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="glass-card text-center">
-                <h3 style="color: #f59e0b;">👥 Total Memberships</h3>
-                <h1 style="color: white;">{{ summary.total_counts.memberships }}</h1>
-                <small style="color: rgba(255,255,255,0.7);">+{{ summary.recent_activity.new_memberships }} this month</small>
-            </div>
-        </div>
+<!-- Header -->
+<div class="analytics-header">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <h1 class="analytics-title">📊 Analytics Dashboard</h1>
+      <p class="analytics-subtitle">Real-time insights into club activities and engagement</p>
     </div>
-
-    <!-- Charts Row -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="glass-card">
-                <h4 style="color: white; margin-bottom: 1rem;">📈 Membership Growth (30 days)</h4>
-                <canvas id="membershipChart" width="400" height="200"></canvas>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="glass-card">
-                <h4 style="color: white; margin-bottom: 1rem;">🎯 Event Attendance (30 days)</h4>
-                <canvas id="attendanceChart" width="400" height="200"></canvas>
-            </div>
-        </div>
+    <div class="col-lg-4 text-lg-end">
+      <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+        <button class="btn-refresh" onclick="refreshAnalytics()">
+          <span>🔄</span> Refresh Data
+        </button>
+        <button class="btn-reminders" onclick="sendReminders()">
+          <span>📧</span> Send Reminders
+        </button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div class="row mb-4">
-        <div class="col-md-12 mb-4">
-            <div class="glass-card">
-                <h4 style="color: white; margin-bottom: 1rem;">📊 Participation Trends (30 days)</h4>
-                <canvas id="participationChart" width="800" height="300"></canvas>
-            </div>
+<!-- Summary Cards -->
+<div class="stats-grid">
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">👥</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.users }}</h3>
+          <p class="stat-label-analytics">Total Users</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_users }} this month</p>
         </div>
+        <div class="stat-bg-analytics">👥</div>
+      </div>
     </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">🏛️</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.clubs }}</h3>
+          <p class="stat-label-analytics">Total Clubs</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_clubs }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">🏛️</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">📅</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.events }}</h3>
+          <p class="stat-label-analytics">Total Events</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_events }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">📅</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card-analytics">
+        <div class="stat-icon-analytics">🤝</div>
+        <div class="stat-info-analytics">
+          <h3 class="stat-number-analytics">{{ summary.total_counts.memberships }}</h3>
+          <p class="stat-label-analytics">Total Memberships</p>
+          <p class="stat-change">+{{ summary.recent_activity.new_memberships }} this month</p>
+        </div>
+        <div class="stat-bg-analytics">🤝</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <!-- Club Status -->
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="glass-card">
-                <h4 style="color: white; margin-bottom: 1rem;">🏛️ Club Status</h4>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="text-center">
-                            <h3 style="color: #10b981;">{{ summary.club_status.active }}</h3>
-                            <p style="color: rgba(255,255,255,0.7);">Active Clubs</p>
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>📈 Membership Growth (30 days)</h4>
+      </div>
+      <div class="chart-body">
+        <canvas id="membershipChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>🎯 Event Attendance (30 days)</h4>
+      </div>
+      <div class="chart-body">
+        <canvas id="attendanceChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>📊 Participation Trends (30 days)</h4>
+      </div>
+      <div class="chart-body">
+        <canvas id="participationChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status and Activity -->
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>🏛️ Club Status</h4>
+      </div>
+      <div class="chart-body">
+        <div class="status-grid">
+          <div class="status-item">
+            <h3 class="status-number">{{ summary.club_status.active }}</h3>
+            <p class="status-label">Active Clubs</p>
+          </div>
+          <div class="status-item">
+            <h3 class="status-number">{{ summary.club_status.pending }}</h3>
+            <p class="status-label">Pending Clubs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>📈 Recent Activity</h4>
+      </div>
+      <div class="chart-body">
+        <div class="activity-stats">
+          <div class="stat-item">
+            <div class="stat-item-icon">🎉</div>
+            <div class="stat-item-text">{{ summary.recent_activity.recent_attendance }} attendances this month</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-icon">�</div>
+            <div class="stat-item-text">{{ summary.recent_activity.upcoming_events }} upcoming events</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-icon">��</div>
+            <div class="stat-item-text">Automated reminders sent daily</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-icon">📊</div>
+            <div class="stat-item-text">Analytics updated in real-time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Event Attendance Details -->
+<div class="row g-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h4>👥 Recent Event Attendance</h4>
+      </div>
+      <div class="chart-body">
+        {% if summary.recent_events_attendance %}
+          <div class="row">
+            {% for event_data in summary.recent_events_attendance %}
+              <div class="col-md-6 mb-4">
+                <div class="event-attendance-card">
+                  <h5>{{ event_data.event.event_name }}</h5>
+                  <p class="event-date">
+                    <small>{{ event_data.event.event_date.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                  </p>
+                  <div class="attendance-summary">
+                    <span class="attendance-count">{{ event_data.attendance_count }} attendees</span>
+                  </div>
+                  {% if event_data.attendees %}
+                    <div class="attendees-list">
+                      <h6>Attendees:</h6>
+                      {% for attendee in event_data.attendees[:5] %}
+                        <div class="attendee-item">
+                          <span class="attendee-name">{{ attendee.name }}</span>
+                          <span class="attendee-email">{{ attendee.email }}</span>
+                          <span class="checkin-time">{{ attendee.checked_in_at.strftime('%I:%M %p') }}</span>
                         </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center">
-                            <h3 style="color: #f59e0b;">{{ summary.club_status.pending }}</h3>
-                            <p style="color: rgba(255,255,255,0.7);">Pending Clubs</p>
+                      {% endfor %}
+                      {% if event_data.attendees|length > 5 %}
+                        <div class="more-attendees">
+                          <small>... and {{ event_data.attendees|length - 5 }} more</small>
                         </div>
+                      {% endif %}
                     </div>
+                  {% else %}
+                    <p class="no-attendees"><small>No attendees recorded</small></p>
+                  {% endif %}
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="glass-card">
-                <h4 style="color: white; margin-bottom: 1rem;">📅 Recent Activity</h4>
-                <div class="activity-stats">
-                    <div class="stat-item">
-                        <span style="color: #667eea;">🎉</span>
-                        <span style="color: white;">{{ summary.recent_activity.recent_attendance }} attendances this month</span>
-                    </div>
-                    <div class="stat-item">
-                        <span style="color: #764ba2;">📧</span>
-                        <span style="color: white;">Automated reminders sent daily</span>
-                    </div>
-                    <div class="stat-item">
-                        <span style="color: #10b981;">📊</span>
-                        <span style="color: white;">Analytics updated in real-time</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-center">No recent events found</p>
+        {% endif %}
+      </div>
     </div>
+  </div>
+</div>
+
 </div>
 
 <!-- Chart.js -->
@@ -130,18 +598,47 @@ const chartConfig = {
     plugins: {
         legend: {
             labels: {
-                color: 'rgba(255,255,255,0.8)'
+                color: 'rgba(255,255,255,0.8)',
+                font: {
+                    size: 14,
+                    weight: '600'
+                }
             }
+        },
+        tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: 'rgba(255,255,255,0.2)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 12
         }
     },
     scales: {
         x: {
-            ticks: { color: 'rgba(255,255,255,0.7)' },
-            grid: { color: 'rgba(255,255,255,0.1)' }
+            ticks: { 
+                color: 'rgba(255,255,255,0.7)',
+                font: {
+                    size: 12
+                }
+            },
+            grid: { 
+                color: 'rgba(255,255,255,0.1)',
+                drawBorder: false
+            }
         },
         y: {
-            ticks: { color: 'rgba(255,255,255,0.7)' },
-            grid: { color: 'rgba(255,255,255,0.1)' }
+            ticks: { 
+                color: 'rgba(255,255,255,0.7)',
+                font: {
+                    size: 12
+                }
+            },
+            grid: { 
+                color: 'rgba(255,255,255,0.1)',
+                drawBorder: false
+            }
         }
     }
 };
@@ -157,7 +654,14 @@ new Chart(membershipCtx, {
             data: [{% for record in membership_growth %}{{ record.metric_value }}{% if not loop.last %},{% endif %}{% endfor %}],
             borderColor: '#667eea',
             backgroundColor: 'rgba(102,126,234,0.1)',
-            tension: 0.4
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
         }]
     },
     options: chartConfig
@@ -174,7 +678,9 @@ new Chart(attendanceCtx, {
             data: [{% for record in event_attendance %}{{ record.metric_value }}{% if not loop.last %},{% endif %}{% endfor %}],
             backgroundColor: 'rgba(16,185,129,0.8)',
             borderColor: '#10b981',
-            borderWidth: 1
+            borderWidth: 2,
+            borderRadius: 8,
+            hoverBackgroundColor: 'rgba(16,185,129,1)'
         }]
     },
     options: chartConfig
@@ -191,7 +697,14 @@ new Chart(participationCtx, {
             data: [{% for record in participation_trends %}{{ record.metric_value }}{% if not loop.last %},{% endif %}{% endfor %}],
             borderColor: '#764ba2',
             backgroundColor: 'rgba(118,75,162,0.1)',
-            tension: 0.4
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#764ba2',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
         }]
     },
     options: chartConfig
@@ -199,6 +712,10 @@ new Chart(participationCtx, {
 
 // Functions
 function refreshAnalytics() {
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '<span>⏳</span> Refreshing...';
+    
     fetch('/analytics/api/refresh', {
         method: 'POST',
         headers: {
@@ -217,11 +734,19 @@ function refreshAnalytics() {
     .catch(error => {
         console.error('Error:', error);
         alert('Error refreshing analytics');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<span>🔄</span> Refresh Data';
     });
 }
 
 function sendReminders() {
     if (confirm('Send event and club reminders to all users?')) {
+        const button = event.target;
+        button.disabled = true;
+        button.innerHTML = '<span>⏳</span> Sending...';
+        
         fetch('/analytics/api/send-reminders', {
             method: 'POST',
             headers: {
@@ -240,32 +765,13 @@ function sendReminders() {
         .catch(error => {
             console.error('Error:', error);
             alert('Error sending reminders');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = '<span>📧</span> Send Reminders';
         });
     }
 }
 </script>
 
-<style>
-.activity-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-canvas {
-    max-height: 300px;
-}
-</style>
 {% endblock %}
