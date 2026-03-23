@@ -302,21 +302,38 @@ def edit(announcement_id):
 @login_required
 def delete(announcement_id):
     """Delete an announcement"""
-    announcement = Announcement.query.get_or_404(announcement_id)
-    club = Club.query.get(announcement.club_id)
-    
-    if current_user.role == 'student':
-        flash('You do not have permission to delete announcements', 'danger')
+    try:
+        print(f"🔍 Announcement delete: Starting deletion of announcement {announcement_id}")
+        
+        announcement = Announcement.query.get_or_404(announcement_id)
+        club = Club.query.get(announcement.club_id)
+        
+        print(f"🔍 Announcement delete: Found announcement: {announcement.title}")
+        print(f"🔍 Announcement delete: User role: {current_user.role}")
+        
+        if current_user.role == 'student':
+            flash('You do not have permission to delete announcements', 'danger')
+            return redirect('/announcements')
+        
+        if current_user.role == 'leader' and announcement.created_by != current_user.id:
+            flash('You can only delete your own announcements', 'danger')
+            return redirect('/announcements')
+        
+        print("🔍 Announcement delete: Deleting announcement from database...")
+        db.session.delete(announcement)
+        db.session.commit()
+        print("🔍 Announcement delete: Successfully deleted and committed")
+        
+        flash('Announcement deleted successfully!', 'success')
         return redirect('/announcements')
-    
-    if current_user.role == 'leader' and announcement.created_by != current_user.id:
-        flash('You can only delete your own announcements', 'danger')
+        
+    except Exception as e:
+        print(f"❌ Announcement delete error: {e}")
+        print(f"❌ Error type: {type(e)}")
+        import traceback
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error deleting announcement. Please try again.', 'danger')
         return redirect('/announcements')
-    
-    db.session.delete(announcement)
-    db.session.commit()
-    flash('Announcement deleted successfully!', 'success')
-    return redirect('/announcements')
 
 # API: React to announcement
 @announcements_bp.route('/api/<int:announcement_id>/react', methods=['POST'])

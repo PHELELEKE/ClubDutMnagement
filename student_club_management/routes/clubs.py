@@ -40,9 +40,18 @@ def join_club(club_id):
         return redirect(f'/clubs/{club_id}')
     # create membership
     membership = Membership(user_id=current_user.id, club_id=club_id)
-    from flask import current_app
-    current_app.extensions['sqlalchemy'].db.session.add(membership)
-    current_app.extensions['sqlalchemy'].db.session.commit()
+    try:
+        print(f"🔍 Club join: Adding membership for user {current_user.id} to club {club_id}")
+        db.session.add(membership)
+        db.session.commit()
+        print("🔍 Club join: Successfully added and committed membership")
+    except Exception as e:
+        print(f"❌ Club join error: {e}")
+        print(f"❌ Error type: {type(e)}")
+        import traceback
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        flash('Error joining club. Please try again.', 'danger')
+        return redirect(f'/clubs/{club_id}')
     
     # Send notification to student
     try:
