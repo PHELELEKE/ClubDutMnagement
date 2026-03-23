@@ -48,7 +48,7 @@ def admin_index():
         print(f"🔍 Admin index: Found {active_members} active members")
         
         print("🔍 Admin index: Rendering template...")
-        return render_template('admin/index.html', 
+        return render_template('dashboard/admin.html', 
                              total_users=total_users,
                              total_clubs=total_clubs,
                              total_events=total_events,
@@ -59,7 +59,7 @@ def admin_index():
         import traceback
         print(f"❌ Full traceback: {traceback.format_exc()}")
         # If queries fail, render basic admin panel with default values
-        return render_template('admin/index.html', 
+        return render_template('dashboard/admin.html', 
                              total_users=0,
                              total_clubs=0,
                              total_events=0,
