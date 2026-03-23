@@ -95,11 +95,10 @@ def create():
             
             print("🔍 Club create: Club object created")
             
-            from flask import current_app
-            current_app.extensions['sqlalchemy'].db.session.add(new_club)
+            db.session.add(new_club)
             print("🔍 Club create: Club added to session")
             
-            current_app.extensions['sqlalchemy'].db.session.commit()
+            db.session.commit()
             print("🔍 Club create: Club committed to database")
             
             flash('Club created successfully! It is now pending approval.', 'success')
