@@ -1,8 +1,6 @@
-from app import db
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from services.analytics_service import AnalyticsService, ReminderService
 import atexit
 import logging
 
@@ -82,6 +80,9 @@ class AnalyticsScheduler:
             with self.app.app_context():
                 logger.info("📊 Calculating daily analytics...")
                 
+                # Import services here to avoid circular imports
+                from services.analytics_service import AnalyticsService
+                
                 # Calculate analytics for the last 30 days
                 AnalyticsService.calculate_membership_growth(30)
                 AnalyticsService.calculate_event_attendance(30)
@@ -113,6 +114,7 @@ class AnalyticsScheduler:
         from models.attendance import EventAttendance
         from models.notification import Notification
         from models.analytics import EventReminder
+        from app import db
         
         now = datetime.utcnow()
         
@@ -211,6 +213,7 @@ class AnalyticsScheduler:
         from models.membership import Membership
         from models.notification import Notification
         from models.analytics import ClubReminder
+        from app import db
         
         now = datetime.utcnow()
         
@@ -258,6 +261,7 @@ class AnalyticsScheduler:
                 
                 # Clean up analytics data older than 90 days
                 from models.analytics import Analytics, EventReminder, ClubReminder
+                from app import db
                 
                 cutoff_date = datetime.utcnow() - timedelta(days=90)
                 
