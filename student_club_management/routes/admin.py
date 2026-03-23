@@ -43,6 +43,14 @@ def admin_index():
         total_events = Event.query.count()
         print(f"🔍 Admin index: Found {total_events} events")
         
+        print("🔍 Admin index: Querying pending clubs...")
+        pending_clubs = Club.query.filter_by(status='pending').count()
+        print(f"🔍 Admin index: Found {pending_clubs} pending clubs")
+        
+        print("🔍 Admin index: Querying active events...")
+        active_events = Event.query.filter(Event.event_date >= datetime.utcnow()).count()
+        print(f"🔍 Admin index: Found {active_events} active events")
+        
         print("🔍 Admin index: Querying active members...")
         active_members = Membership.query.filter_by(status='active').count()
         print(f"🔍 Admin index: Found {active_members} active members")
@@ -51,7 +59,8 @@ def admin_index():
         return render_template('dashboard/admin.html', 
                              total_users=total_users,
                              total_clubs=total_clubs,
-                             total_events=total_events,
+                             pending_clubs=pending_clubs,
+                             active_events=active_events,
                              active_members=active_members)
     except Exception as e:
         print(f"❌ Admin index error: {e}")
@@ -62,7 +71,8 @@ def admin_index():
         return render_template('dashboard/admin.html', 
                              total_users=0,
                              total_clubs=0,
-                             total_events=0,
+                             pending_clubs=0,
+                             active_events=0,
                              active_members=0)
 
 @admin_bp.route('/users')

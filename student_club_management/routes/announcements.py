@@ -194,10 +194,10 @@ def create():
         flash('Announcement created successfully!', 'success')
         return redirect(f'/announcements/{announcement.id}')
     
+    # Show all clubs for admin (including pending ones), active clubs for others
     if current_user.role == 'admin':
-        clubs = Club.query.filter(Club.status == 'active').all()
+        clubs = Club.query.all()
     else:
-        # Show all active clubs to any leader (not just clubs they created)
         clubs = Club.query.filter(Club.status == 'active').all()
     
     return render_template('announcements/create.html', clubs=clubs)
