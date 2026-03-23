@@ -1,73 +1,87 @@
 {% extends 'base.html' %}
-{% block title %}{{ announcement.title }} - DUT Club Management{% endblock %}
+{% block title %}{{ announcement.title }} - Announcement{% endblock %}
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-lg-10 mx-auto">
-            <div class="glass-card">
-                <div class="mb-3">
-                    <a href="/announcements" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: #fff;">Back to Announcements</a>
-                </div>
-                
-                <div class="announcement-detail-header">
-                    {% if announcement.pinned %}
-                    <span class="badge bg-primary mb-2">Pinned</span>
-                    {% endif %}
-                    {% if announcement.priority == 'urgent' %}
-                    <span class="badge bg-danger mb-2">Urgent</span>
-                    {% elif announcement.priority == 'important' %}
-                    <span class="badge bg-warning mb-2">Important</span>
-                    {% endif %}
-                    
-                    <h1 style="color: #fff;">{{ announcement.title }}</h1>
-                    <p style="color: rgba(255,255,255,0.6);">
-                        By <strong>{{ announcement.creator.first_name }} {{ announcement.creator.last_name }}</strong>
-                        from <strong>{{ club.club_name }}</strong>
-                    </p>
-                </div>
-                
-                <div class="announcement-detail-content">
-                    <p style="color: #fff; white-space: pre-wrap;">{{ announcement.content }}</p>
-                </div>
-                
-                {% if announcement.attachment_url %}
-                <div class="announcement-attachments">
-                    <h5 style="color: #fff;">Attachment</h5>
-                    <a href="/{{ announcement.attachment_url }}" class="attachment-item" target="_blank">
-                        <span>📎 {{ announcement.attachment_name or 'Download Attachment' }}</span>
-                    </a>
-                </div>
-                {% endif %}
-                
-                {% if announcement.resource_links %}
-                <div class="announcement-links">
-                    <h5 style="color: #fff;">Resource Links</h5>
-                    <div class="d-flex flex-wrap gap-2">
-                        {% for link in announcement.resource_links %}
-                        {% if link %}
-                        <a href="{{ link }}" class="attachment-item" target="_blank" style="display: inline-block; padding: 8px 16px; background: rgba(102,126,234,0.2); border-radius: 20px; color: #fff; text-decoration: none; border: 1px solid rgba(102,126,234,0.3);">
-                            <span>🔗 {{ link|truncate(30) }}</span>
-                        </a>
-                        {% endif %}
-                        {% endfor %}
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">📢 {{ announcement.title }}</h4>
+                        <div>
+                            {% if announcement.priority == 'urgent' %}
+                            <span class="badge bg-danger me-2">🚨 Urgent</span>
+                            {% elif announcement.priority == 'important' %}
+                            <span class="badge bg-warning me-2">⚠️ Important</span>
+                            {% endif %}
+                            {% if announcement.pinned %}
+                            <span class="badge bg-info me-2">📌 Pinned</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                {% endif %}
                 
-                {% if current_user.role == 'admin' or announcement.created_by == current_user.id %}
-                <div class="announcement-actions mb-4">
-                    <a href="/announcements/{{ announcement.id }}/edit" class="btn btn-sm" style="background: rgba(102,126,234,0.3); color: #fff;">Edit</a>
-                    <form method="POST" action="/announcements/{{ announcement.id }}/delete" class="d-inline" onsubmit="return confirm('Delete this announcement?');">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <button type="submit" class="btn btn-sm" style="background: rgba(239,68,68,0.3); color: #fff;">🗑️ Delete</button>
-                    </form>
+                <div class="card-body">
+                    <div class="announcement-meta mb-3">
+                        <small class="text-muted">
+                            Posted by <strong>{{ announcement.creator.first_name }} {{ announcement.creator.last_name }}</strong> 
+                            on {{ announcement.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        </small>
+                    </div>
+                    
+                    <div class="announcement-content mb-4">
+                        <p>{{ announcement.content | nl2br }}</p>
+                    </div>
+                    
+                    {% if announcement.attachment_url %}
+                    <div class="attachment-section mb-4">
+                        <h6>📎 Attachment:</h6>
+                        <a href="/{{ announcement.attachment_url }}" 
+                           class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="fas fa-download me-1"></i>
+                            {{ announcement.attachment_name or 'Download Attachment' }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if announcement.resource_links %}
+                    <div class="resource-links mb-4">
+                        <h6>🔗 Resource Links:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for link in announcement.resource_links %}
+                            <a href="{{ link }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                {{ link | truncate(30) }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="announcement-actions">
+                        {% if current_user.role == 'admin' or announcement.created_by == current_user.id %}
+                        <div class="btn-group" role="group">
+                            <a href="/announcements/{{ announcement.id }}/edit" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <form method="POST" action="/announcements/{{ announcement.id }}/delete" class="d-inline" onsubmit="return confirm('Delete this announcement?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-                {% endif %}
                 
-                <div class="announcement-footer mt-4">
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.9em;">
+                <div class="card-footer text-muted">
+                    <small>
                         Posted on {{ announcement.created_at.strftime('%B %d, %Y at %I:%M %p') }}
-                    </p>
+                        {% if announcement.updated_at != announcement.created_at %}
+                        | Last updated {{ announcement.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        {% endif %}
+                    </small>
                 </div>
             </div>
         </div>
