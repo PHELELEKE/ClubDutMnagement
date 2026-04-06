@@ -422,7 +422,7 @@ body::before {
             </div>
             <div class="col-lg-4 text-end">
                 <div class="pulsing-glass-element p-4 d-inline-block">
-                    <div class="text-white text-center">
+                    <div class="text-white">
                         <i class="fas fa-calendar-alt fa-3x mb-3"></i>
                         <p class="mb-0 fw-bold fs-5">{{ current_date }}</p>
                         <small class="fs-6">Today</small>
@@ -438,16 +438,20 @@ body::before {
             <!-- Special Student Status Element -->
             <div class="col-12">
                 <div class="pulsing-glass-element p-4">
-                    <div class="text-center">
-                        <div class="stat-icon mb-3" style="background: var(--gradient-primary); width: 80px; height: 80px; font-size: 32px;">
-                            <i class="fas fa-user-graduate"></i>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="stat-icon mb-3" style="background: var(--gradient-primary); width: 80px; height: 80px; font-size: 32px;">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
                         </div>
-                        <h4 class="text-white mb-2">Student Status</h4>
-                        <p class="text-white-50 mb-0">Active Member</p>
-                        <div class="mt-2">
-                            <span class="badge glass-card px-2 py-1">
-                                <i class="fas fa-check-circle me-1"></i>Verified
-                            </span>
+                        <div class="flex-grow-1">
+                            <h4 class="text-white mb-2">Student Status</h4>
+                            <p class="text-white-50 mb-0">Active Member</p>
+                            <div class="mt-2">
+                                <span class="badge glass-card px-2 py-1">
+                                    <i class="fas fa-check-circle me-1"></i>Verified
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -526,20 +530,26 @@ body::before {
                     {% for event in events[:4] %}
                     <div class="col-md-6 col-lg-3 mb-3">
                         <div class="event-card">
-                            <div class="text-center">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 60px; height: 60px;">
-                                    <i class="fas fa-calendar fa-lg"></i>
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-calendar fa-lg"></i>
+                                    </div>
                                 </div>
-                                <h6 class="text-white mb-2">{{ event.event_name }}</h6>
-                                <p class="text-white-50 small mb-2">{{ event.event_date.strftime('%b %d, %Y') }}</p>
-                                <span class="badge bg-info">{{ event.club.club_name }}</span>
+                                <div class="flex-grow-1">
+                                    <h6 class="text-white mb-2">{{ event.event_name }}</h6>
+                                    <p class="text-white-50 small mb-2">{{ event.event_date.strftime('%b %d, %Y') }}</p>
+                                    <span class="badge bg-info">{{ event.club.club_name }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     {% else %}
-                    <div class="col-12 text-center py-3">
-                        <i class="fas fa-calendar fa-2x text-white-50 mb-2"></i>
-                        <p class="text-white-50 mb-0">No upcoming events</p>
+                    <div class="col-12 py-3">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="fas fa-calendar fa-2x text-white-50 me-3"></i>
+                            <p class="text-white-50 mb-0">No upcoming events</p>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
