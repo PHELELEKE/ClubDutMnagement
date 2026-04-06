@@ -261,3 +261,13 @@ def quick_stats():
     except Exception as e:
         print(f"❌ Quick stats error: {e}")
         return jsonify({'error': str(e)}), 500
+
+@dashboard_bp.route('/test')
+@login_required
+def dashboard_test():
+    """Simple test route to verify dashboard functionality"""
+    try:
+        return render_template('dashboard/test.html')
+    except Exception as e:
+        print(f"❌ Dashboard test error: {e}")
+        return f"Dashboard test error: {e}", 500
