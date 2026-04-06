@@ -516,7 +516,7 @@ body::before {
                     <h5 class="text-white mb-0">
                         <i class="fas fa-calendar me-2"></i>Upcoming Events
                     </h5>
-                    <a href="{{ url_for('events.index') }}" class="btn btn-outline-primary btn-sm">View Calendar</a>
+                    <a href="{{ url_for('events.calendar') }}" class="btn btn-outline-primary btn-sm">View Calendar</a>
                 </div>
                 <div class="row">
                     {% for event in events[:4] %}
