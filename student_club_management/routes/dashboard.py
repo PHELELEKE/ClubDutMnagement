@@ -46,7 +46,8 @@ def user_dashboard():
                              events=upcoming_events,
                              announcements=announcements,
                              achievements=achievements,
-                             message_count=message_count)
+                             message_count=message_count,
+                             current_date=datetime.now().strftime('%B %d, %Y'))
     except Exception as e:
         print(f"❌ User dashboard error: {e}")
         # Return basic dashboard with default values if queries fail
@@ -57,7 +58,8 @@ def user_dashboard():
                              events=[],
                              announcements=[],
                              achievements=[],
-                             message_count=0)
+                             message_count=0,
+                             current_date=datetime.now().strftime('%B %d, %Y'))
 
 @dashboard_bp.route('/leader')
 @login_required
