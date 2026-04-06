@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -71,6 +71,9 @@ def create_app(config_name='development'):
         from routes.notifications import notifications_bp
         from routes.chat import chat_bp
         from routes.analytics import analytics_bp
+        from routes.search import search_bp
+        from routes.uploads import uploads_bp
+        from routes.settings import settings_bp
         
         app.register_blueprint(auth_bp)
         app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -81,6 +84,9 @@ def create_app(config_name='development'):
         app.register_blueprint(notifications_bp, url_prefix='/notifications')
         app.register_blueprint(chat_bp, url_prefix='/chat')
         app.register_blueprint(analytics_bp)
+        app.register_blueprint(search_bp)
+        app.register_blueprint(uploads_bp)
+        app.register_blueprint(settings_bp)
     
     # Register blueprints after app context is set up
     register_blueprints()
@@ -133,14 +139,44 @@ def create_app(config_name='development'):
     def health_check():
         return {'status': 'healthy', 'message': 'Club Management System is running'}, 200
     
-    # Error handlers
+    # Enhanced error handlers
     @app.errorhandler(404)
     def not_found_error(error):
-        return render_template('404.html'), 404
-    
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Resource not found', 'status': 404}), 404
+        return render_template('errors/404.html', error=error), 404
+
     @app.errorhandler(500)
     def internal_error(error):
         db.session.rollback()
-        return render_template('500.html'), 500
+        
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Internal server error', 'status': 500}), 500
+        
+        # Log error for debugging
+        print(f"❌ 500 Error: {error}")
+        return render_template('errors/500.html', error=error), 500
+
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Access forbidden', 'status': 403}), 403
+        return render_template('errors/403.html', error=error), 403
+
+    @app.errorhandler(413)
+    def too_large_error(error):
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'File too large', 'status': 413}), 413
+        flash('File too large. Maximum size is 16MB.', 'danger')
+        return redirect(request.referrer or url_for('main.index'))
+
+    # Add security headers
+    @app.after_request
+    def security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        return response
     
     return app

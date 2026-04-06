@@ -1,0 +1,38 @@
+{% extends "base/base.html" %}
+
+{% block title %}Server Error - DUT Club Management{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger"></i>
+                    </div>
+                    <h1 class="display-4 text-danger">500</h1>
+                    <h2 class="mb-3">Server Error</h2>
+                    <p class="text-muted mb-4">Something went wrong on our end. We're working to fix it.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Go Home
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-secondary">
+                            <i class="fas fa-sync me-2"></i>Try Again
+                        </button>
+                    </div>
+                    {% if current_user and current_user.role == 'admin' %}
+                    <div class="mt-4">
+                        <details class="text-start">
+                            <summary class="btn btn-sm btn-outline-danger">Error Details (Admin Only)</summary>
+                            <pre class="mt-2 p-2 bg-light rounded"><code>{{ error|default('No error details available') }}</code></pre>
+                        </details>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

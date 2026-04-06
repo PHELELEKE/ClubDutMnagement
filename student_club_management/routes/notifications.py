@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, flash, current_app
 from flask_login import login_required, current_user
 from models.notification import Notification
+from app import db
+from datetime import datetime
 
 notifications_bp = Blueprint('notifications', __name__, url_prefix='/notifications')
 
@@ -303,4 +305,105 @@ def api_send_reminders():
         'meetings_processed': meetings_count,
         'message': f'Sent reminders for {events_count} events and {meetings_count} meetings'
     })
+
+@notifications_bp.route('/mark-all-read', methods=['POST'])
+@login_required
+def mark_all_read():
+    """Mark all notifications as read"""
+    try:
+        # Update all unread notifications
+        unread_notifications = Notification.query.filter_by(
+            user_id=current_user.id, 
+            is_read=False
+        ).all()
+        
+        for notification in unread_notifications:
+            notification.is_read = True
+            notification.read_at = datetime.now()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'All notifications marked as read',
+            'count': 0
+        })
+    except Exception as e:
+        print(f"❌ Mark all read error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@notifications_bp.route('/api/recent')
+@login_required
+def recent_notifications():
+    """Get recent notifications for dashboard"""
+    try:
+        notifications = Notification.query.filter_by(user_id=current_user.id)\
+            .order_by(Notification.created_at.desc())\
+            .limit(10).all()
+        
+        notifications_data = []
+        for notification in notifications:
+            notifications_data.append({
+                'id': notification.id,
+                'title': notification.title,
+                'message': notification.message,
+                'type': notification.type,
+                'is_read': notification.is_read,
+                'created_at': notification.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'action_url': notification.action_url
+            })
+        
+        return jsonify(notifications_data)
+    except Exception as e:
+        print(f"❌ Recent notifications error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@notifications_bp.route('/mark-read/<int:notification_id>', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    """Mark a specific notification as read"""
+    try:
+        notification = Notification.query.filter_by(
+            id=notification_id,
+            user_id=current_user.id
+        ).first()
+        
+        if not notification:
+            return jsonify({'success': False, 'error': 'Notification not found'}), 404
+        
+        notification.is_read = True
+        notification.read_at = datetime.now()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Notification marked as read'
+        })
+    except Exception as e:
+        print(f"❌ Mark notification read error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@notifications_bp.route('/delete/<int:notification_id>', methods=['DELETE'])
+@login_required
+def delete_notification(notification_id):
+    """Delete a notification"""
+    try:
+        notification = Notification.query.filter_by(
+            id=notification_id,
+            user_id=current_user.id
+        ).first()
+        
+        if not notification:
+            return jsonify({'success': False, 'error': 'Notification not found'}), 404
+        
+        db.session.delete(notification)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Notification deleted'
+        })
+    except Exception as e:
+        print(f"❌ Delete notification error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 

@@ -1556,6 +1556,71 @@ body.dark .btn {
     color: #f1f5f9;
 }
 
+/* Announcement Cards */
+.glass-card-announcement {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    display: block;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card-announcement:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: inherit;
+}
+
+.glass-card-announcement.pinned {
+    border-left: 4px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.glass-card-announcement.urgent {
+    border-left: 4px solid #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.glass-card-announcement.important {
+    border-left: 4px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.glass-card-announcement h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.glass-card-announcement .club-name {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.glass-card-announcement .content {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.glass-card-announcement .announcement-date {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    display: block;
+}
+
 [data-theme="dark"] .glass-card-announcement,
 [data-theme="dark"] .glass-card-notification {
     background: rgba(15, 23, 42, 0.6);

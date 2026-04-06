@@ -12,27 +12,260 @@
         {% endif %}
     </div>
     
-    {% if announcements %}
-    <div class="announcements-grid">
-        {% for announcement in announcements %}
-        <a href="/announcements/{{ announcement.id }}" class="glass-card-announcement {% if announcement.pinned %}pinned{% endif %} {% if announcement.priority == 'urgent' %}urgent{% elif announcement.priority == 'important' %}important{% endif %}">
-            <h3>{{ announcement.title }}</h3>
-            <p class="club-name">{{ announcement.club.club_name }}</p>
-            <p class="content">{{ announcement.content[:200] }}{% if announcement.content|length > 200 %}...{% endif %}</p>
-            <span class="announcement-date">{{ announcement.created_at.strftime('%B %d, %Y') }}</span>
-        </a>
-        {% endfor %}
+    <!-- Enhanced Search and Filter -->
+    <div class="glass-card-announcement mb-4">
+        <div class="p-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="searchAnnouncements" placeholder="Search announcements..." style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterPriority" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                        <option value="">All Priorities</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="high">High</option>
+                        <option value="normal">Normal</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterClub" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                        <option value="">All Clubs</option>
+                        {% for club in clubs %}
+                        <option value="{{ club.id }}">{{ club.club_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
-    {% else %}
-    <div class="glass-card-announcement text-center">
-        <span style="font-size: 3rem;">📢</span>
-        <h3>No Announcements</h3>
-        <p>Join some clubs to see their announcements!</p>
+    
+    <!-- Quick Filter Buttons -->
+    <div class="glass-card-announcement mb-4">
+        <div class="p-3">
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-sm" onclick="filterAnnouncements('pinned')" style="background: rgba(255,193,7,0.3); color: #fff;">
+                    <i class="fas fa-thumbtack me-1"></i>Pinned Only
+                </button>
+                <button class="btn btn-sm" onclick="filterAnnouncements('urgent')" style="background: rgba(220,53,69,0.3); color: #fff;">
+                    <i class="fas fa-exclamation-triangle me-1"></i>Urgent Only
+                </button>
+                <button class="btn btn-sm" onclick="filterAnnouncements('all')" style="background: rgba(102,126,234,0.3); color: #fff;">
+                    <i class="fas fa-list me-1"></i>Show All
+                </button>
+            </div>
+        </div>
     </div>
-    {% endif %}
+    
+    <!-- Statistics Sidebar -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <!-- Enhanced Announcement Cards -->
+            {% if announcements %}
+            <div id="announcementsList" class="announcements-grid">
+                {% for announcement in announcements %}
+                <a href="/announcements/{{ announcement.id }}" class="glass-card-announcement {% if announcement.pinned %}pinned{% endif %} {% if announcement.priority == 'urgent' %}urgent{% elif announcement.priority == 'important' %}important{% endif %}" 
+                   data-priority="{{ announcement.priority }}" data-club="{{ announcement.club_id or '' }}" data-pinned="{{ announcement.pinned }}">
+                    {% if announcement.pinned %}
+                    <div class="pinned-badge">
+                        <i class="fas fa-thumbtack"></i> Pinned
+                    </div>
+                    {% endif %}
+                    
+                    <div class="priority-badge priority-{{ announcement.priority }}">
+                        {{ announcement.priority.title() }}
+                    </div>
+                    
+                    <h3>{{ announcement.title }}</h3>
+                    <p class="club-name">{{ announcement.club.club_name }}</p>
+                    <p class="content">{{ announcement.content[:200] }}{% if announcement.content|length > 200 %}...{% endif %}</p>
+                    
+                    {% if announcement.attachment_url %}
+                    <div class="attachment-info">
+                        <i class="fas fa-paperclip me-1"></i>
+                        <span>{{ announcement.attachment_name or 'Attachment' }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if announcement.resource_links %}
+                    <div class="resource-info">
+                        <i class="fas fa-link me-1"></i>
+                        <span>Resources available</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="announcement-meta">
+                        <span class="announcement-date">{{ announcement.created_at.strftime('%B %d, %Y') }}</span>
+                        <span class="announcement-author">by {{ announcement.creator.name }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="glass-card-announcement text-center">
+                <span style="font-size: 3rem;">📢</span>
+                <h3>No Announcements</h3>
+                <p>Join some clubs to see their announcements!</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="glass-card-announcement">
+                <div class="p-3">
+                    <h6><i class="fas fa-chart-bar me-2"></i>Statistics</h6>
+                    <div class="stats-list">
+                        <div class="stat-item">
+                            <span>Total Announcements:</span>
+                            <strong>{{ announcements|length }}</strong>
+                        </div>
+                        <div class="stat-item">
+                            <span>Pinned:</span>
+                            <strong>{{ announcements|selectattr('pinned')|list|length }}</strong>
+                        </div>
+                        <div class="stat-item">
+                            <span>Urgent:</span>
+                            <strong>{{ announcements|selectattr('priority', 'equalto', 'urgent')|list|length }}</strong>
+                        </div>
+                        <div class="stat-item">
+                            <span>This Week:</span>
+                            <strong>{{ announcements|selectattr('created_at')|list|length }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script>
+// Enhanced filtering functionality
+function filterAnnouncements(type) {
+    const cards = document.querySelectorAll('.glass-card-announcement');
+    cards.forEach(card => {
+        if (type === 'all') {
+            card.style.display = 'block';
+        } else if (type === 'pinned') {
+            card.style.display = card.dataset.pinned === 'True' ? 'block' : 'none';
+        } else if (type === 'urgent') {
+            card.style.display = card.dataset.priority === 'urgent' ? 'block' : 'none';
+        }
+    });
+}
+
+// Search functionality
+document.getElementById('searchAnnouncements')?.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.glass-card-announcement');
+    
+    cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const content = card.querySelector('.content').textContent.toLowerCase();
+        
+        if (title.includes(searchTerm) || content.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Priority filter
+document.getElementById('filterPriority')?.addEventListener('change', function(e) {
+    const priority = e.target.value;
+    const cards = document.querySelectorAll('.glass-card-announcement');
+    
+    cards.forEach(card => {
+        if (!priority) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = card.dataset.priority === priority ? 'block' : 'none';
+        }
+    });
+});
+
+// Club filter
+document.getElementById('filterClub')?.addEventListener('change', function(e) {
+    const clubId = e.target.value;
+    const cards = document.querySelectorAll('.glass-card-announcement');
+    
+    cards.forEach(card => {
+        if (!clubId) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = card.dataset.club === clubId ? 'block' : 'none';
+        }
+    });
+});
+</script>
+
 <style>
+.pinned-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 193, 7, 0.9);
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.priority-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.priority-urgent {
+    background: rgba(220, 53, 69, 0.9);
+    color: #fff;
+}
+
+.priority-high {
+    background: rgba(255, 193, 7, 0.9);
+    color: #000;
+}
+
+.priority-normal {
+    background: rgba(23, 162, 184, 0.9);
+    color: #fff;
+}
+
+.attachment-info, .resource-info {
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.announcement-meta {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.stats-list .stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-list .stat-item:last-child {
+    border-bottom: none;
+}
+
+.form-control::placeholder, .form-select option {
+    color: rgba(255, 255, 255, 0.6);
+}
+
 .btn-create-announcement {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
@@ -70,6 +303,7 @@
     transition: 0.3s;
     text-decoration: none;
     display: block;
+    position: relative;
 }
 
 .glass-card-announcement:hover {
@@ -102,45 +336,19 @@
 }
 
 .content {
-    margin: 0 0 15px 0;
-    opacity: 0.9;
-    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.5;
+    margin: 0 0 12px 0;
 }
 
 .announcement-date {
-    font-size: 12px;
-    opacity: 0.7;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-.text-center {
-    text-align: center;
+.announcement-author {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const markAllBtn = document.getElementById('markAllReadBtn');
-    if (markAllBtn) {
-        markAllBtn.addEventListener('click', function() {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch('/announcements/api/mark-all-read', {
-                method: 'POST',
-                headers: {'X-CSRFToken': csrfToken}
-            }).then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    markAllBtn.textContent = 'All Marked Read ✓';
-                    markAllBtn.style.background = 'rgba(34,197,94,0.3)';
-                    setTimeout(() => {
-                        markAllBtn.textContent = 'Mark All Read';
-                        markAllBtn.style.background = 'rgba(102,126,234,0.3)';
-                    }, 2000);
-                }
-            }).catch(error => console.error('Mark all read failed:', error));
-        });
-    }
-});
-</script>
 {% endblock %}
-

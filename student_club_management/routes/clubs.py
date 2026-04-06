@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from models.club import Club
 from models.membership import Membership
 from models.notification import Notification
+from models.event import Event
+from models.announcement import Announcement
 from app import db
+from datetime import datetime
+from sqlalchemy import or_, and_
 
 clubs_bp = Blueprint('clubs', __name__, url_prefix='/clubs')
 
@@ -532,3 +536,79 @@ def deny_leave(club_id, user_id):
     
     flash(f'{user.first_name} {user.last_name}\'s leave request has been denied.', 'info')
     return redirect(f'/clubs/{club_id}/manage')
+
+@clubs_bp.route('/api/stats')
+@login_required
+def club_stats():
+    """Get club statistics for dashboard"""
+    try:
+        if current_user.role == 'admin':
+            clubs = Club.query.all()
+        elif current_user.role == 'leader':
+            clubs = Club.query.filter(Club.status == 'active').all()
+        else:
+            memberships = Membership.query.filter_by(user_id=current_user.id, status='active').all()
+            clubs = [m.club for m in memberships]
+        
+        stats = {
+            'total_clubs': len(clubs),
+            'active_clubs': len([c for c in clubs if c.status == 'active']),
+            'total_members': sum([c.members.count() for c in clubs]),
+            'upcoming_events': sum([c.events.filter(Event.start_time >= datetime.now()).count() for c in clubs])
+        }
+        
+        return jsonify(stats)
+    except Exception as e:
+        print(f"❌ Club stats error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@clubs_bp.route('/<int:club_id>/members')
+@login_required
+def club_members(club_id):
+    """View club members with enhanced interface"""
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check permissions
+        if current_user.role not in ['admin', 'leader']:
+            membership = Membership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+            if not membership:
+                flash('You are not a member of this club', 'danger')
+                return redirect(url_for('clubs.index'))
+        
+        members = Membership.query.filter_by(club_id=club_id, status='active').all()
+        
+        return render_template('clubs/members.html', club=club, members=members)
+    except Exception as e:
+        print(f"❌ Club members error: {e}")
+        flash('Error loading club members', 'danger')
+        return redirect(url_for('clubs.index'))
+
+@clubs_bp.route('/<int:club_id>/activity')
+@login_required
+def club_activity(club_id):
+    """View club activity feed"""
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check permissions
+        if current_user.role not in ['admin', 'leader']:
+            membership = Membership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+            if not membership:
+                flash('You are not a member of this club', 'danger')
+                return redirect(url_for('clubs.index'))
+        
+        # Get recent announcements
+        announcements = Announcement.query.filter_by(club_id=club_id).order_by(Announcement.created_at.desc()).limit(10).all()
+        
+        # Get recent events
+        events = Event.query.filter_by(club_id=club_id).order_by(Event.start_time.desc()).limit(10).all()
+        
+        # Get recent members
+        recent_members = Membership.query.filter_by(club_id=club_id, status='active').order_by(Membership.created_at.desc()).limit(5).all()
+        
+        return render_template('clubs/activity.html', club=club, announcements=announcements, events=events, recent_members=recent_members)
+    except Exception as e:
+        print(f"❌ Club activity error: {e}")
+        flash('Error loading club activity', 'danger')
+        return redirect(url_for('clubs.index'))
