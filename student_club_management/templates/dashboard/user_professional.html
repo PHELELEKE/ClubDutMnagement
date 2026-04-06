@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard - DUT Club Management{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+<div class="glass-card mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-mobile-column">
+    <div class="text-mobile-center">
+      <h2>Student Dashboard 🎓</h2>
+      <p class="lead mb-0">Welcome back, {{ current_user.first_name }}!</p>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-lg-0">
+      <a href="/clubs" class="btn btn-primary btn-lg">
+        <i class="fas fa-users"></i> Browse Clubs
+      </a>
+      <a href="/announcements" class="btn btn-warning btn-lg">
+        <i class="fas fa-bullhorn"></i> View News
+      </a>
+      <a href="/events/calendar" class="btn btn-success btn-lg">
+        <i class="fas fa-calendar-alt"></i> Events Calendar
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-navigation mb-0">
+  <ul class="nav nav-tabs border-0" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active fw-bold" id="clubs-tab" data-bs-toggle="tab" data-bs-target="#clubs" type="button" role="tab">🎭 My Clubs</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fw-bold" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">📅 Upcoming Events</button>
+    </li>
+  </ul>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content glass-card" style="border-radius: 0 12px 12px 12px; border-top: none; padding-top: 1.5rem;">
+  <!-- Clubs Tab -->
+  <div class="tab-pane fade show active" id="clubs" role="tabpanel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">My Clubs</h4>
+      <a href="/clubs" class="btn btn-info btn-sm">
+        <i class="fas fa-search"></i> Browse All Clubs
+      </a>
+    </div>
+    
+    {% if memberships %}
+      <div class="row g-3 justify-content-start">
+        {% for membership in memberships %}
+        <div class="col-xl-4 col-lg-6 col-md-8">
+          <div class="glass-card h-100 club-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">{{ membership.club.club_name }}</h5>
+              <span class="badge bg-{% if membership.status == 'active' %}success{% elif membership.status == 'pending' %}warning{% else %}danger{% endif %}">
+                {% if membership.status == 'active' %}✓ Active{% elif membership.status == 'pending' %}⏳ Pending{% else %}✗ Inactive{% endif %}
+              </span>
+            </div>
+            <p class="text-muted small mb-2">{{ membership.club.category }}</p>
+            <p class="text-muted small mb-3">{{ membership.club.description[:80] }}...</p>
+            
+            <div class="club-stats small mb-3">
+              <p class="mb-1"><strong>👥 Members:</strong> {{ membership.club.members|length or 0 }}/{{ membership.club.max_members or '∞' }}</p>
+              <p class="mb-0"><strong>📅 Joined:</strong> {{ membership.joined_at.strftime('%b %d, %Y') }}</p>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <a href="/clubs/{{ membership.club.id }}" class="btn btn-sm btn-info flex-grow-1">View</a>
+              {% if membership.role == 'leader' %}
+              <a href="/clubs/{{ membership.club.id }}/manage" class="btn btn-sm btn-warning flex-grow-1">Manage</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+        <h4>No Club Memberships</h4>
+        <p class="text-muted">Join clubs to see them here!</p>
+        <a href="/clubs" class="btn btn-primary">Browse Clubs</a>
+      </div>
+    {% endif %}
+  </div>
+  
+  <!-- Events Tab -->
+  <div class="tab-pane fade" id="events" role="tabpanel">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">Upcoming Events</h4>
+      <a href="/events/calendar" class="btn btn-success btn-sm">View Calendar</a>
+    </div>
+    
+    {% if events %}
+      <div class="row g-3 justify-content-start">
+        {% for event in events[:6] %}
+        <div class="col-xl-4 col-lg-6 col-md-8">
+          <div class="glass-card h-100 event-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">{{ event.event_name }}</h5>
+              <span class="badge bg-{% if event.status == 'approved' %}success{% elif event.status == 'ongoing' %}info{% else %}warning{% endif %}">
+                {{ event.status.title() }}
+              </span>
+            </div>
+            <p class="text-muted small mb-2">
+              <i class="fas fa-calendar me-1"></i>{{ event.event_date.strftime('%b %d, %Y at %I:%M %p') }}
+            </p>
+            <p class="text-muted small mb-2">
+              <i class="fas fa-map-marker-alt me-1"></i>{{ event.location or 'Location TBD' }}
+            </p>
+            <p class="text-muted small mb-3">{{ event.description[:100] }}...</p>
+            
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge bg-info">{{ event.club.club_name }}</span>
+              {% if event.registration_required %}
+              <span class="badge bg-warning">Registration Required</span>
+              {% endif %}
+            </div>
+            
+            <div class="d-flex gap-2">
+              <a href="/events/{{ event.id }}" class="btn btn-sm btn-primary flex-grow-1">View Details</a>
+              {% if event.is_registered %}
+              <span class="btn btn-sm btn-success flex-grow-1">✓ Registered</span>
+              {% else %}
+              <a href="/events/{{ event.id }}/register" class="btn btn-sm btn-info flex-grow-1">Register</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
+        <h4>No Upcoming Events</h4>
+        <p class="text-muted">Check back soon for exciting events!</p>
+        <a href="/events/calendar" class="btn btn-primary">View Calendar</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.dashboard-content {
+  padding: 2rem 0;
+}
+
+.club-card {
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--primary-color);
+}
+
+.club-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.event-card {
+  transition: all 0.3s ease;
+  border-left: 4px solid var(--success-color);
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.club-stats {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+}
+
+.tab-navigation {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .d-flex.gap-2 {
+    flex-direction: column;
+  }
+  
+  .btn-lg {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+</style>
+{% endblock %}
