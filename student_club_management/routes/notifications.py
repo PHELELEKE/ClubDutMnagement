@@ -358,32 +358,6 @@ def recent_notifications():
         print(f"❌ Recent notifications error: {e}")
         return jsonify({'error': str(e)}), 500
 
-@notifications_bp.route('/api/recent')
-@login_required
-def recent_notifications():
-    """Get recent notifications for dashboard"""
-    try:
-        notifications = Notification.query.filter_by(user_id=current_user.id)\
-            .order_by(Notification.created_at.desc())\
-            .limit(10).all()
-        
-        notifications_data = []
-        for notification in notifications:
-            notifications_data.append({
-                'id': notification.id,
-                'title': notification.title,
-                'message': notification.message,
-                'type': notification.type,
-                'is_read': notification.is_read,
-                'created_at': notification.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'action_url': notification.action_url
-            })
-        
-        return jsonify(notifications_data)
-    except Exception as e:
-        print(f"❌ Recent notifications error: {e}")
-        return jsonify({'error': str(e)}), 500
-
 @notifications_bp.route('/mark-read/<int:notification_id>', methods=['POST'])
 @login_required
 def mark_notification_read(notification_id):
