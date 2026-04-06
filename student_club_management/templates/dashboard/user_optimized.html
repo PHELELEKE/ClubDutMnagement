@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<style>
+/* Optimized Liquid Glass Dashboard */
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --pulsing-gradient: linear-gradient(50deg, rgba(255, 255, 255, 0.4) 12%, rgba(255, 255, 255, 0.1) 77%);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --glass-bg: rgba(0, 0, 0, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Optimized Pulsing Glass Element */
+.pulsing-glass-optimized {
+    background: var(--pulsing-gradient);
+    background-blend-mode: overlay;
+    transform: translate(0px, 0px);
+    box-shadow: 0px 4px 24px 1px rgba(0, 0, 0, 0.28);
+    animation: optimizedPulse 2s infinite ease-out;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+}
+
+@keyframes optimizedPulse {
+    0%, 100% { 
+        box-shadow: 0px 4px 24px 1px rgba(0, 0, 0, 0.28);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.3);
+        transform: scale(1.02);
+    }
+}
+
+/* Glass Card with optimized hover */
+.glass-card-optimized {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card-optimized:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Stat Icon with optimized animation */
+.stat-icon-optimized {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    background: var(--gradient-primary);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.stat-icon-optimized:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Welcome Banner Optimized */
+.welcome-banner-optimized {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 25px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Activity Item Optimized */
+.activity-item-optimized {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.activity-item-optimized:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Liquid Button Optimized */
+.liquid-button-optimized {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    color: white;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.liquid-button-optimized:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive Grid */
+.stats-grid-optimized {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+@media (max-width: 768px) {
+    .stats-grid-optimized {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+
+<div class="container mt-4">
+    <!-- Welcome Banner with Pulsing Effect -->
+    <div class="welcome-banner-optimized">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-3 text-white">
+                    Welcome back, <span class="text-warning">{{ current_user.name }}</span>! 👋
+                </h1>
+                <p class="mb-2 text-white fs-5">
+                    <i class="fas fa-envelope me-2"></i>{{ current_user.email }}
+                </p>
+                <div class="mb-0">
+                    <span class="badge pulsing-glass-optimized px-3 py-2 me-2">
+                        <i class="fas fa-user-graduate me-2"></i>Student
+                    </span>
+                    <span class="badge glass-card-optimized px-3 py-2">
+                        <i class="fas fa-id-card me-2"></i>{{ current_user.student_id or 'ID: Not Set' }}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="pulsing-glass-optimized p-3 d-inline-block">
+                    <div class="text-white text-center">
+                        <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                        <p class="mb-0 fw-bold">April 6, 2026</p>
+                        <small>Today</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid with Pulsing Elements -->
+    <div class="stats-grid-optimized">
+        <!-- Special Student Status with Pulsing -->
+        <div class="pulsing-glass-optimized p-4">
+            <div class="text-center">
+                <div class="stat-icon-optimized mb-3">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h4 class="text-white mb-2">Student Status</h4>
+                <p class="text-white-50 mb-0">Active Member</p>
+                <div class="mt-2">
+                    <span class="badge glass-card-optimized px-2 py-1">
+                        <i class="fas fa-check-circle me-1"></i>Verified
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card-optimized p-4">
+            <div class="text-center">
+                <div class="stat-icon-optimized">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="text-white mb-2">{{ clubs_count }}</h3>
+                <p class="text-white-50 mb-0">My Clubs</p>
+            </div>
+        </div>
+        
+        <div class="glass-card-optimized p-4">
+            <div class="text-center">
+                <div class="stat-icon-optimized" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3 class="text-white mb-2">{{ upcoming_events|length }}</h3>
+                <p class="text-white-50 mb-0">Upcoming Events</p>
+            </div>
+        </div>
+        
+        <div class="glass-card-optimized p-4">
+            <div class="text-center">
+                <div class="stat-icon-optimized" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <h3 class="text-white mb-2">12</h3>
+                <p class="text-white-50 mb-0">New Announcements</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="glass-card-optimized p-4 mb-4">
+        <h3 class="text-white mb-4">
+            <i class="fas fa-bolt me-2"></i>Quick Actions
+        </h3>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <a href="/announcements" class="liquid-button-optimized w-100">
+                    <i class="fas fa-bullhorn me-2"></i>View Announcements
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/clubs" class="liquid-button-optimized w-100">
+                    <i class="fas fa-users me-2"></i>Browse Clubs
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/events" class="liquid-button-optimized w-100">
+                    <i class="fas fa-calendar me-2"></i>View Events
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/chat" class="liquid-button-optimized w-100">
+                    <i class="fas fa-comments me-2"></i>Chat Room
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="glass-card-optimized p-4">
+                <h3 class="text-white mb-4">
+                    <i class="fas fa-clock me-2"></i>Recent Activity
+                </h3>
+                
+                <div class="activity-item-optimized">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="stat-icon-optimized" style="width: 40px; height: 40px; font-size: 16px;">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-white mb-1">Joined Computer Science Club</h6>
+                            <small class="text-white-50">2 hours ago</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activity-item-optimized">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="stat-icon-optimized" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-white mb-1">Registered for Tech Talk</h6>
+                            <small class="text-white-50">5 hours ago</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="activity-item-optimized">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="stat-icon-optimized" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-white mb-1">New Announcement Posted</h6>
+                            <small class="text-white-50">1 day ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="glass-card-optimized p-4">
+                <h3 class="text-white mb-4">
+                    <i class="fas fa-chart-line me-2"></i>Quick Stats
+                </h3>
+                
+                <div class="activity-item-optimized">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-white">
+                            <i class="fas fa-eye me-2"></i>Profile Views
+                        </span>
+                        <span class="badge glass-card-optimized">47</span>
+                    </div>
+                </div>
+                
+                <div class="activity-item-optimized">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-white">
+                            <i class="fas fa-envelope me-2"></i>Messages
+                        </span>
+                        <span class="badge glass-card-optimized">12</span>
+                    </div>
+                </div>
+                
+                <div class="activity-item-optimized">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-white">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </span>
+                        <span class="badge glass-card-optimized">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
