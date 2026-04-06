@@ -351,4 +351,117 @@ document.getElementById('filterClub')?.addEventListener('change', function(e) {
     color: rgba(255, 255, 255, 0.6);
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark All Read functionality
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function() {
+            fetch('/announcements/api/mark-all-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove unread indicators
+                    document.querySelectorAll('.unread-indicator').forEach(el => el.remove());
+                    
+                    // Update badge count
+                    const badge = document.querySelector('.notification-badge');
+                    if (badge) {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                    
+                    // Show success message
+                    markAllReadBtn.textContent = '✓ Marked All Read';
+                    markAllReadBtn.style.background = 'rgba(16, 185, 129, 0.3)';
+                    
+                    setTimeout(() => {
+                        markAllReadBtn.textContent = 'Mark All Read';
+                        markAllReadBtn.style.background = 'rgba(102,126,234,0.3)';
+                    }, 2000);
+                } else {
+                    alert('Error marking announcements as read. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error marking announcements as read. Please try again.');
+            });
+        });
+    }
+    
+    // Search functionality
+    const searchInput = document.getElementById('searchAnnouncements');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const announcements = document.querySelectorAll('.glass-card-announcement');
+            
+            announcements.forEach(announcement => {
+                const title = announcement.querySelector('h3')?.textContent.toLowerCase() || '';
+                const content = announcement.querySelector('.content')?.textContent.toLowerCase() || '';
+                
+                if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                    announcement.style.display = 'block';
+                } else {
+                    announcement.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Filter functionality
+    const filterPriority = document.getElementById('filterPriority');
+    const filterClub = document.getElementById('filterClub');
+    
+    function applyFilters() {
+        const priorityFilter = filterPriority?.value;
+        const clubFilter = filterClub?.value;
+        const announcements = document.querySelectorAll('.glass-card-announcement');
+        
+        announcements.forEach(announcement => {
+            let show = true;
+            
+            if (priorityFilter) {
+                const priority = announcement.dataset.priority;
+                if (priority !== priorityFilter) show = false;
+            }
+            
+            if (clubFilter) {
+                const clubId = announcement.dataset.club;
+                if (clubId !== clubFilter) show = false;
+            }
+            
+            announcement.style.display = show ? 'block' : 'none';
+        });
+    }
+    
+    if (filterPriority) filterPriority.addEventListener('change', applyFilters);
+    if (filterClub) filterClub.addEventListener('change', applyFilters);
+});
+
+function filterAnnouncements(type) {
+    const announcements = document.querySelectorAll('.glass-card-announcement');
+    
+    announcements.forEach(announcement => {
+        if (type === 'pinned') {
+            const isPinned = announcement.classList.contains('pinned');
+            announcement.style.display = isPinned ? 'block' : 'none';
+        } else if (type === 'urgent') {
+            const isUrgent = announcement.classList.contains('urgent');
+            announcement.style.display = isUrgent ? 'block' : 'none';
+        } else {
+            announcement.style.display = 'block';
+        }
+    });
+}
+</script>
 {% endblock %}
