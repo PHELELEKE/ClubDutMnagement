@@ -23,15 +23,12 @@ def user_dashboard():
         total_announcements = Announcement.query.count()
         print(f"🔍 Database totals: memberships={total_memberships}, events={total_events}, announcements={total_announcements}")
         
-        # Get user's memberships and clubs (only active ones)
-        user_memberships = Membership.query.filter_by(user_id=current_user.id, status='active').all()
+        # Get user's memberships and clubs (include all memberships, not just active)
+        user_memberships = Membership.query.filter_by(user_id=current_user.id).all()
         clubs_count = len(user_memberships)
         
-        # Get all upcoming events (approved events from now onwards)
-        upcoming_events = Event.query.filter(
-            Event.status == 'approved',
-            Event.event_date >= datetime.now()
-        ).order_by(Event.event_date).limit(6).all()
+        # Get all events (not just upcoming approved ones)
+        upcoming_events = Event.query.order_by(Event.event_date.desc()).limit(6).all()
         
         # Get all announcements (no status field in Announcement model)
         announcements = Announcement.query.order_by(Announcement.created_at.desc()).limit(3).all()
@@ -45,9 +42,9 @@ def user_dashboard():
         # Debug information - print to console for troubleshooting
         print(f"🔍 Dashboard Debug - User ID: {current_user.id}")
         print(f"🔍 Dashboard Debug - User Email: {current_user.email}")
-        print(f"🔍 Dashboard Debug - Active Memberships: {len(user_memberships)}")
+        print(f"🔍 Dashboard Debug - All Memberships: {len(user_memberships)}")
         print(f"🔍 Dashboard Debug - Clubs Count: {clubs_count}")
-        print(f"🔍 Dashboard Debug - Upcoming Events: {len(upcoming_events)}")
+        print(f"🔍 Dashboard Debug - Events: {len(upcoming_events)}")
         print(f"🔍 Dashboard Debug - Announcements: {len(announcements)}")
         
         # Force template context to ensure data is passed
