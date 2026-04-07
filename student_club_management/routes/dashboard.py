@@ -16,6 +16,13 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 @login_required
 def user_dashboard():
     try:
+        # Test database connection
+        print(f"🔍 Testing database connection...")
+        total_memberships = Membership.query.count()
+        total_events = Event.query.count()
+        total_announcements = Announcement.query.count()
+        print(f"🔍 Database totals: memberships={total_memberships}, events={total_events}, announcements={total_announcements}")
+        
         # Get user's memberships and clubs (only active ones)
         user_memberships = Membership.query.filter_by(user_id=current_user.id, status='active').all()
         clubs_count = len(user_memberships)
