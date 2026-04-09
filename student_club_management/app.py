@@ -37,11 +37,22 @@ def create_app(config_name='development'):
             database_url = database_url.replace('postgresql://', 'postgresql+pg8000://')
         app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'pool_pre_ping': True,
+            'pool_recycle': 300,
+            'pool_timeout': 20,
+            'max_overflow': 10
+        }
         app.config['MAIL_SERVER'] = 'smtp.gmail.com'
         app.config['MAIL_PORT'] = 587
         app.config['MAIL_USE_TLS'] = True
         app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
         app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+        
+        # Production-specific settings
+        app.config['DEBUG'] = False
+        app.config['TESTING'] = False
+        app.config['PROPAGATE_EXCEPTIONS'] = False
     
     # Initialize extensions
     db.init_app(app)
@@ -178,7 +189,23 @@ def create_app(config_name='development'):
         if request.path.startswith('/api/'):
             return jsonify({'error': 'File too large', 'status': 413}), 413
         flash('File too large. Maximum size is 16MB.', 'danger')
-        return redirect(request.referrer or url_for('main.index'))
+        return redirect(request.referrer or url_for('index'))
+
+    # Add a catch-all handler for any other errors
+    @app.errorhandler(Exception)
+    def handle_exception(error):
+        try:
+            db.session.rollback()
+            
+            if request.path.startswith('/api/'):
+                return jsonify({'error': 'Server error', 'status': 500}), 500
+            
+            # Log error for debugging
+            print(f"Unhandled exception: {error}")
+            return render_template('errors/500.html', error=error), 500
+        except Exception as e:
+            print(f"Error in exception handler: {e}")
+            return "Server error", 500
 
     # Add security headers
     @app.after_request
