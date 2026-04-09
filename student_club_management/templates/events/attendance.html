@@ -398,13 +398,26 @@ async function startScanning() {
     document.getElementById('stopScanBtn').style.display = 'inline-block';
     
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
+        // Check if mediaDevices is supported
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('Camera API is not supported in this browser. Please use a modern browser like Chrome, Firefox, or Safari.');
+        }
+        
+        // Check if page is served over HTTPS (required for camera access)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            throw new Error('Camera access requires HTTPS. Please access this page over a secure connection.');
+        }
+        
+        // Request camera access with fallback options
+        const constraints = {
+            video: {
                 facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                width: { ideal: 1280, max: 1920 },
+                height: { ideal: 720, max: 1080 }
             }
-        });
+        };
+        
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
         
         // Wait for video to be ready
@@ -413,8 +426,36 @@ async function startScanning() {
             scanning = true;
             scanQRCode();
         };
+        
     } catch (err) {
-        alert('Cannot access camera: ' + err.message);
+        let errorMessage = 'Cannot access camera: ';
+        
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            errorMessage += 'Camera permission denied. Please allow camera access in your browser settings and refresh the page.';
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            errorMessage += 'No camera found. Please connect a camera and try again.';
+        } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+            errorMessage += 'Camera is already in use by another application. Please close other apps using the camera.';
+        } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+            errorMessage += 'Camera does not support the required settings. Trying with lower quality...';
+            // Try with lower quality as fallback
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    scanning = true;
+                    scanQRCode();
+                };
+                return;
+            } catch (fallbackErr) {
+                errorMessage += ' Still failed. ' + fallbackErr.message;
+            }
+        } else {
+            errorMessage += err.message;
+        }
+        
+        alert(errorMessage);
         document.getElementById('startScanBtn').style.display = 'inline-block';
         document.getElementById('stopScanBtn').style.display = 'none';
         scannerContainer.style.display = 'none';
